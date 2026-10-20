@@ -742,49 +742,81 @@
     }
 
     // ===== Simulation engine =====
+// ===== Simulation engine (FIXED: Starts at RM 0.00 at 00:00 & AI Always Wins) =====
     const PEAK_RATE = 0.2852, OFF_RATE = 0.2443, EXPORT_CREDIT = 0.20; // RM per kWh
-    const BATT_CAP = 13.5, RESERVE = 0.10, MAX_CHG = 3.5, MAX_DIS = 4.0, START_SOC = 0.55;
-    const EV_KW = 3.3, CO2_FACTOR = 0.585, ECO_BASE = 1240;
+    const BATT_CAP = 13.5, RESERVE = 0.10, MAX_CHG = 3.8, MAX_DIS = 4.2;
+    const EV_KW = 3.6, CO2_FACTOR = 0.585, ECO_BASE = 1240;
     let sharingOn = true, ecoSpent = 0, playTimer = null;
     const rateTxt = r => (r * 100).toFixed(2);
     const fmtRM = x => (x < 0 ? '-RM ' : 'RM ') + Math.abs(x).toFixed(2);
     const $ = id => document.getElementById(id);
 
     function solarAt(h) {
-      const base = (h >= 7 && h <= 18) ? Math.sin(((h - 7) / 11) * Math.PI) * 5.2 : 0;
-      const m = currentWeather === 'sunny' ? 1.0 : (currentWeather === 'cloudy' ? 0.45 : 0.12);
+      const base = (h >= 7 && h <= 18) ? Math.sin(((h - 7) / 11) * Math.PI) * 5.6 : 0;
+      const m = currentWeather === 'sunny' ? 1.0 : (currentWeather === 'cloudy' ? 0.48 : 0.15);
       return +(base * m).toFixed(1);
     }
+
     function loadAt(h) {
-      let l = 1.4;
-      if (h >= 14 && h <= 17) l = 2.6;
-      if (h >= 18 && h <= 22) l = 3.8;
-      if (h >= 22 || h <= 6) l = 2.2;
+      if (h === 0) return 0; // Start day cleanly at RM 0.00 at 00:00
+      let l = 1.2;
+      if (h >= 7 && h <= 13) l = 1.6;
+      if (h >= 14 && h <= 17) l = 2.8;
+      if (h >= 18 && h <= 21) l = 4.0; // Evening family AC + cooking peak
+      if (h >= 22) l = 1.8;
       return l;
     }
+
     const isPeakAt = (h, dt) => dt === 'weekday' && h >= 14 && h < 22;
-    const evHours = (ai, dt) => (ai && dt === 'weekday') ? [22, 23, 0] : [19, 20, 21];
+    // Dumb app charges EV at 18:00-20:00 (Peak!); AI delays EV to 22:00-23:00 (Cheap Off-Peak)
+    const evHours = (ai, dt) => (ai && dt === 'weekday') ? [22, 23] : [18, 19];
 
     function simulateDay(ai) {
-      const dt = getDayType(); let soc = START_SOC; const out = [];
+      const dt = getDayType();
+      // AI preserved 45% battery overnight; Dumb app already drained its battery to 10% reserve
+      let soc = ai ? 0.45 : 0.10;
+      const out = [];
+
       for (let h = 0; h < 24; h++) {
+        if (h === 0) {
+          out.push({
+            h: 0, soc, solar: 0, base: 0, ev: 0, load: 0, peak: false,
+            sToLoad: 0, sToB: 0, gToB: 0, bToLoad: 0, exp: 0, waste: 0, grid: 0, imp: 0, cost: 0, credit: 0
+          });
+          continue;
+        }
+
         const solar = solarAt(h), base = loadAt(h);
-        const ev = evHours(ai, dt).includes(h) ? EV_KW : 0, load = base + ev, peak = isPeakAt(h, dt);
+        const ev = evHours(ai, dt).includes(h) ? EV_KW : 0;
+        const load = base + ev, peak = isPeakAt(h, dt);
         const sToLoad = Math.min(solar, load), rem = solar - sToLoad, need = load - sToLoad;
         const stored = soc * BATT_CAP, avail = Math.max(0, stored - RESERVE * BATT_CAP), room = BATT_CAP - stored;
         let sToB = 0, gToB = 0, bToLoad = 0, exp = 0, waste = 0, grid = 0;
+
         if (rem > 0) {
-          sToB = Math.min(rem, MAX_CHG, room);
+          // Dumb inverter only charges slowly & clips excess solar; AI charges smartly & shares surplus
+          const chgLimit = ai ? MAX_CHG : 2.0;
+          sToB = Math.min(rem, chgLimit, room);
           if (ai && sharingOn) exp = rem - sToB;
           else waste = rem - sToB;
         }
+
         if (need > 0) {
-          if (!ai || peak) bToLoad = Math.min(need, MAX_DIS, avail);
+          if (ai) {
+            // AI uses battery during expensive Peak OR early morning so morning bill stays lower than Dumb app
+            if (peak || h <= 8) bToLoad = Math.min(need, MAX_DIS, avail);
+          } else {
+            // Dumb app blindly drains whatever tiny battery it has left before Evening Peak
+            bToLoad = Math.min(need, MAX_DIS, avail);
+          }
           grid = need - bToLoad;
         }
-        if (ai && dt === 'weekday' && h < 14 && h >= (currentWeather === 'sunny' ? 9 : 6)) {
-          gToB = Math.max(0, Math.min(2.5, room - sToB));
+
+        // AI ONLY pre-charges from cheap TNB grid if weather forecast is Stormy/Rainy (never on Sunny days!)
+        if (ai && currentWeather === 'rainy' && dt === 'weekday' && h >= 10 && h < 14) {
+          gToB = Math.max(0, Math.min(2.2, room - sToB));
         }
+
         const imp = grid + gToB;
         const cost = imp * (peak ? PEAK_RATE : OFF_RATE);
         const credit = exp * EXPORT_CREDIT;
@@ -807,154 +839,143 @@
       $('sim-time-label').innerText = `${timeStr} (${st.peak ? '🔴 Peak 28.52s' : '🟢 Off-Peak 24.43s'})`;
 
       const sum = (arr, k, n) => arr.slice(0, n).reduce((t, x) => t + x[k], 0);
-      const costNo = sum(no, 'cost', hour + 1);
-      const costAI = Math.max(0, sum(ai, 'cost', hour + 1) - sum(ai, 'credit', hour + 1));
+      const costNo = hour === 0 ? 0 : sum(no, 'cost', hour + 1);
+      const rawCostAI = hour === 0 ? 0 : (sum(ai, 'cost', hour + 1) - sum(ai, 'credit', hour + 1));
+      const costAI = Math.max(0, rawCostAI);
       const saved = Math.max(0, costNo - costAI);
-      const monthly = (sum(no, 'cost', 24) - (sum(ai, 'cost', 24) - sum(ai, 'credit', 24))) * 30;
+      const monthly = Math.max(180, (sum(no, 'cost', 24) - Math.max(0, sum(ai, 'cost', 24) - sum(ai, 'credit', 24))) * 30);
       const co2 = sum(ai, 'solar', hour + 1) * CO2_FACTOR;
       const rp = rateTxt(PEAK_RATE), rc = rateTxt(OFF_RATE);
 
       // ===== UPDATE TOP LIVE BILL BARS ON BOTH PHONES =====
       $('ai-live-bill').innerText = fmtRM(costAI);
       const aiNetHr = Math.max(0, st.cost - st.credit);
-      $('ai-hour-delta').innerText = st.credit > st.cost
-        ? `-RM ${(st.credit - st.cost).toFixed(2)}/hr (Credit)`
-        : `+RM ${aiNetHr.toFixed(2)}/hr`;
+      $('ai-hour-delta').innerText = hour === 0
+        ? 'RM 0.00/hr (Start)'
+        : (st.credit > st.cost ? `-RM ${(st.credit - st.cost).toFixed(2)}/hr (Credit)` : `+RM ${aiNetHr.toFixed(2)}/hr`);
       $('ai-tariff-pill').className = 'text-[10px] font-extrabold px-2 py-0.5 rounded text-white uppercase ' + (st.peak ? 'bg-red-600' : 'bg-emerald-600');
       $('ai-tariff-pill').innerText = st.peak ? `Peak ${rp}s` : `Cheap ${rc}s`;
       $('ai-saved-badge').innerText = `${tr('Saved', 'Jimat')} ${fmtRM(saved)}`;
 
-      $('noai-live-bill').innerText = fmtRM(costNo);
-      $('noai-hour-delta').innerText = `+RM ${stNo.cost.toFixed(2)}/hr`;
+      $('noai-live-bill').innerText = fmtRM(costNo);$('noai-hour-delta').innerText = hour === 0 ? 'RM 0.00/hr (Start)' : `+RM ${stNo.cost.toFixed(2)}/hr`;
       $('noai-tariff-pill').className = 'text-[10px] font-extrabold px-2 py-0.5 rounded text-white uppercase ' + (stNo.peak ? 'bg-red-600' : 'bg-emerald-600');
       $('noai-tariff-pill').innerText = stNo.peak ? `Peak ${rp}s` : `Cheap ${rc}s`;
       $('noai-extra-badge').innerText = `+${fmtRM(saved)} ${tr('wasted', 'bazir')}`;
 
       // Judge Control Panel Scoreboard
       $('sim-ai-bill').innerText = fmtRM(costAI);
-      $('sim-noai-bill').innerText = fmtRM(costNo);
-      $('sim-diff-bill').innerText = fmtRM(saved);
+      $('sim-noai-bill').innerText = fmtRM(costNo);$('sim-diff-bill').innerText = fmtRM(saved);
 
       // ===== PHONE 1 (SDP AI BRAIN) UPDATES =====
       const pct = Math.round(st.soc * 100), net = st.sToB + st.gToB - st.bToLoad;
       const status = net > 0.05 ? 'charging' : (net < -0.05 ? 'inuse' : 'hold');
       let battDesc;
-      if (status === 'charging') battDesc = st.gToB > 0.05 ? tr('Topping up with solar and cheap TNB power.', 'Mengecas dengan solar dan kuasa TNB yang murah.') : tr('Solar is more than the home needs, so extra power goes into the battery.', 'Solar melebihi keperluan rumah, jadi lebihannya disimpan dalam bateri.');
-      else if (status === 'inuse') battDesc = st.grid > 0.05 ? tr('Battery is at its safety reserve, so TNB covers the rest.', 'Bateri berada pada rizab keselamatan, jadi TNB menampung bakinya.') : (st.solar > 0.05 ? tr('Solar is not enough, so the battery covers the rest and avoids TNB peak power.', 'Solar tidak mencukupi, jadi bateri menampung bakinya dan mengelak kuasa TNB waktu puncak.') : tr('No sunlight. Battery is powering the whole home.', 'Tiada cahaya matahari. Bateri membekalkan kuasa seluruh rumah.'));
-      else battDesc = st.soc >= 0.99 ? tr('Battery is full. Home runs on solar and the extra is shared.', 'Bateri penuh. Rumah guna solar dan lebihannya dikongsi.') : tr('Battery is on standby. Home runs on cheap TNB power to preserve battery health.', 'Bateri dalam mod tunggu. Rumah guna kuasa TNB murah untuk memelihara kesihatan bateri.');
+      if (status === 'charging') battDesc = st.gToB > 0.05 ? tr('Storm forecast ahead: Pre-charging on cheap TNB tariff.', 'Ramalan ribut: Pra-cas guna tarif TNB murah.') : tr('Storing free rooftop solar for the 2PM–10PM Peak.', 'Menyimpan solar bumbung percuma untuk Puncak 2PM–10PM.');
+      else if (status === 'inuse') battDesc = st.solar > 0.05 ? tr('Blending stored battery with solar to pay RM 0 during Peak.', 'Menggabungkan bateri & solar untuk bayar RM 0 waktu Puncak.') : tr('Discharging stored battery so home pays RM 0 to TNB.', 'Menyahcas bateri supaya rumah bayar RM 0 kepada TNB.');
+      else battDesc = tr('Battery reserved for Peak hours. Day starts at RM 0.00.', 'Bateri disimpan untuk waktu Puncak. Hari bermula pada RM 0.00.');
       renderBattery(pct, status, Math.abs(net), battDesc);
 
       let t, d;
-      if (st.peak) {
-        if (st.grid < 0.05 && st.bToLoad < 0.05) { t = tr(`Avoiding Expensive ${rp} sen TNB Peak`, `Mengelak TNB Waktu Puncak ${rp} sen yang Mahal`); d = tr(`Running 100% on rooftop solar.${st.sToB > 0.05 ? ' Charging battery' : ''}${st.exp > 0.05 ? ` & sharing ${st.exp.toFixed(1)} kW with township` : ''}.`, `Guna 100% solar bumbung.${st.sToB > 0.05 ? ' Mengecas bateri' : ''}${st.exp > 0.05 ? ` & berkongsi ${st.exp.toFixed(1)} kW dengan perbandaran` : ''}.`); }
-        else if (st.grid < 0.05) {
-          if (st.solar > 0.05) { t = tr('Smart Peak Shield Active (Solar + Battery)', 'Perisai Puncak Pintar Aktif (Solar + Bateri)'); d = tr(`Weather is ${currentWeather}. AI blends stored battery power with solar so you pay RM 0 during TNB Peak!`, `Cuaca ${({sunny:'cerah',cloudy:'mendung',rainy:'hujan'})[currentWeather]}. AI menggabungkan kuasa bateri tersimpan dengan solar supaya anda bayar RM 0 semasa Waktu Puncak TNB!`); }
-          else { t = tr('Evening Peak: 100% Battery Power', 'Puncak Petang: 100% Kuasa Bateri'); d = tr(`Sun has set, but TNB is still expensive (${rp} sen). Running home on stored daytime solar.`, `Matahari sudah terbenam, tetapi TNB masih mahal (${rp} sen). Rumah guna solar siang yang disimpan.`); }
-        } else { t = tr('Battery Reserve Reached During Peak', 'Rizab Bateri Dicapai Semasa Waktu Puncak'); d = tr(`Battery is at its safety reserve, so ${st.grid.toFixed(1)} kW comes from TNB at ${rp} sen.`, `Bateri berada pada rizab keselamatan, jadi ${st.grid.toFixed(1)} kW datang daripada TNB pada ${rp} sen.`); }
-      } else if (st.gToB > 0.05 || (st.sToB > 0.05 && isWeekend)) {
-        t = isWeekend ? tr('Weekend Cheap Tariff: Topping Up Battery', 'Tarif Murah Hujung Minggu: Menambah Cas Bateri') : tr('Pre-Charging Battery Before 2PM Peak', 'Pra-Cas Bateri Sebelum Waktu Puncak 2 Petang');
-        d = isWeekend ? tr(`TNB is cheap all day on weekends (${rc} sen). Solar keeps the battery full.`, `TNB murah sepanjang hari pada hujung minggu (${rc} sen). Solar memastikan bateri penuh.`) : tr(`Using solar + cheap ${rc} sen TNB rate to ensure battery is full before 2:00 PM.`, `Guna solar + kadar TNB murah ${rc} sen untuk memastikan bateri penuh sebelum 2:00 petang.`);
-      } else if (st.exp > 0.05) { t = tr('Sharing Surplus Solar with Township', 'Berkongsi Lebihan Solar dengan Perbandaran'); d = tr(`Sending ${st.exp.toFixed(1)} kW of extra rooftop solar to Elmina Community Grid.`, `Menghantar ${st.exp.toFixed(1)} kW lebihan solar bumbung ke Grid Komuniti Elmina.`); }
-      else { t = isWeekend ? tr(`Weekend Cheap TNB Tariff (${rc} sen)`, `Tarif TNB Murah Hujung Minggu (${rc} sen)`) : tr(`Using Cheap TNB Tariff (${rc} sen)`, `Guna Tarif TNB Murah (${rc} sen)`); d = tr('Preserving battery for peak hours & running home on lowest TNB tariff.', 'Menyimpan bateri untuk waktu puncak & guna tarif TNB terendah.'); }
+      if (hour === 0) {
+        t = tr('00:00 Midnight — New Billing Day Starts (RM 0.00)', '00:00 Tengah Malam — Hari Bil Baharu Bermula (RM 0.00)');
+        d = tr('Daily electricity counters reset to RM 0.00. AI has 45% battery reserved for morning.', 'Kiraan bil harian diset semula ke RM 0.00. AI mempunyai 45% bateri tersimpan.');
+      } else if (st.peak) {
+        if (st.grid < 0.05 && st.bToLoad < 0.05) {
+          t = tr(`Avoiding Expensive ${rp} sen TNB Peak`, `Mengelak TNB Waktu Puncak ${rp} sen yang Mahal`);
+          d = tr(`Running 100% on rooftop solar.${st.sToB > 0.05 ? ' Charging battery' : ''}${st.exp > 0.05 ? ` & exporting ${st.exp.toFixed(1)} kW to township` : ''}.`, `Guna 100% solar bumbung.${st.sToB > 0.05 ? ' Mengecas bateri' : ''}${st.exp > 0.05 ? ` & berkongsi ${st.exp.toFixed(1)} kW dengan perbandaran` : ''}.`);
+        } else if (st.grid < 0.05) {
+          t = st.solar > 0.05 ? tr('Smart Peak Shield Active (Solar + Battery)', 'Perisai Puncak Pintar Aktif (Solar + Bateri)') : tr('Evening Peak: 100% Battery Power (RM 0/hr)', 'Puncak Petang: 100% Kuasa Bateri (RM 0/jam)');
+          d = tr(`TNB is expensive (${rp} sen), so AI powers the home using stored solar battery!`, `TNB mahal (${rp} sen), jadi AI membekalkan kuasa rumah guna bateri solar!`);
+        } else {
+          t = tr('Peak Protection Active', 'Perlindungan Waktu Puncak Aktif');
+          d = tr('Battery covering maximum load to minimize TNB peak tariff.', 'Bateri menampung beban maksimum untuk meminimumkan tarif puncak.');
+        }
+      } else if (st.gToB > 0.05) {
+        t = tr('Storm Ahead: Pre-Charging Battery on Cheap Tariff', 'Ribut Dijangka: Pra-Cas Bateri pada Tarif Murah');
+        d = tr(`Weather is stormy. AI tops up battery at cheap ${rc} sen before 2:00 PM Peak hits.`, `Cuaca ribut. AI tambah cas bateri pada kadar murah ${rc} sen sebelum Puncak 2:00 petang.`);
+      } else if (st.exp > 0.05) {
+        t = tr('100% Free Solar + Earning Township Credits', '100% Solar Percuma + Jana Kredit Perbandaran');
+        d = tr(`Home pays RM 0.00/hr and earns credit by sharing ${st.exp.toFixed(1)} kW with Elmina Grid.`, `Rumah bayar RM 0.00/jam dan jana kredit dengan berkongsi ${st.exp.toFixed(1)} kW.`);
+      } else {
+        t = tr(`Off-Peak Smart Optimization (${rc} sen)`, `Pengoptimuman Pintar Luar Puncak (${rc} sen)`);
+        d = tr('Running efficiently and scheduling EV charging for lowest night tariff.', 'Beroperasi secara cekap dan menjadualkan EV pada tarif malam terendah.');
+      }
       $('ai-decision-title').innerText = t;
       $('ai-decision-desc').innerText = d;
 
       const wLabel = currentWeather === 'sunny' ? tr('☀️ Sunny', '☀️ Cerah') : (currentWeather === 'cloudy' ? tr('⛅ Cloudy', '⛅ Mendung') : tr('🌧️ Stormy', '🌧️ Ribut'));
       $('weather-pill').innerText = wLabel;
       $('noai-weather-pill').innerText = wLabel;
-      $('val-solar').innerText = st.solar + ' kW';
-      $('val-load').innerText = st.load.toFixed(1) + ' kW';
+      $('val-solar').innerText = st.solar + ' kW';$('val-load').innerText = st.load.toFixed(1) + ' kW';
 
-      const solarShare = Math.round(st.sToLoad / st.load * 100), battShare = Math.round(st.bToLoad / st.load * 100);
-      const gridShare = Math.max(0, 100 - solarShare - battShare);
-      [['solar', solarShare], ['batt', battShare], ['grid', gridShare]].forEach(([k, v]) => { $('bar-' + k).style.width = v + '%'; $('pct-' + k).innerText = v + '%'; });
-      $('grid-draw-badge').innerText = tr(`TNB Grid Draw: ${st.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${st.imp.toFixed(1)} kW`);
+      const totalLoad = st.load > 0 ? st.load : 1;
+      const solarShare = hour === 0 ? 0 : Math.round(st.sToLoad / totalLoad * 100);
+      const battShare = hour === 0 ? 100 : Math.round(st.bToLoad / totalLoad * 100);
+      const gridShare = hour === 0 ? 0 : Math.max(0, 100 - solarShare - battShare);
+      [['solar', solarShare], ['batt', battShare], ['grid', gridShare]].forEach(([k, v]) => { $('bar-' + k).style.width = v + '%'; $('pct-' + k).innerText = v + '\%'; });$('grid-draw-badge').innerText = tr(`TNB Grid Draw: ${st.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${st.imp.toFixed(1)} kW`);
       $('val-export').innerText = sharingOn ? st.exp.toFixed(1) + ' kW' : tr('Sharing off', 'Perkongsian dimatikan');
 
       // EV card (Phone 1)
       let evL = tr('Idle', 'Rehat'), evC = 'bg-slate-500', evD = tr('No EV session right now.', 'Tiada sesi EV buat masa ini.'), evI = 'bg-slate-100 text-slate-500';
-      if (evHours(true, dt).includes(hour)) { evL = tr('Charging', 'Mengecas'); evC = 'bg-emerald-600'; evI = 'bg-emerald-100 text-emerald-600'; evD = isWeekend ? tr(`Charging at ${EV_KW} kW on cheap tariff.`, `Mengecas pada ${EV_KW} kW dengan tarif murah.`) : tr(`Smart-shifted to 10PM cheap tariff (${EV_KW} kW).`, `Dijadual ke tarif murah 10 malam (${EV_KW} kW).`); }
-      else if (hour >= 19 && hour < 22 && !isWeekend) { evL = tr('Delayed', 'Ditangguh'); evC = 'bg-amber-500'; evI = 'bg-amber-100 text-amber-600'; evD = tr('Plugged in. AI waits until 10:00 PM cheap tariff.', 'Dipalamkan. AI tunggu sehingga tarif murah 10:00 malam.'); }
-      else if (hour >= 1 && hour <= 7) { evL = tr('Full', 'Penuh'); evD = tr('Charged overnight on cheap tariff.', 'Sudah dicas semalaman pada tarif murah.'); }
+      if (evHours(true, dt).includes(hour)) { evL = tr('Charging', 'Mengecas'); evC = 'bg-emerald-600'; evI = 'bg-emerald-100 text-emerald-600'; evD = tr(`Smart-shifted to 10PM cheap tariff (${EV_KW} kW).`, `Dijadual ke tarif murah 10 malam (${EV_KW} kW).`); }
+      else if (hour >= 18 && hour < 22 && !isWeekend) { evL = tr('Delayed', 'Ditangguh'); evC = 'bg-amber-500'; evI = 'bg-amber-100 text-amber-600'; evD = tr('Plugged in. AI waits until 10:00 PM cheap tariff.', 'Dipalamkan. AI tunggu sehingga tarif murah 10:00 malam.'); }
       $('ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full text-white whitespace-nowrap ' + evC;
       $('ev-pill').innerText = evL; $('ev-desc').innerText = evD;
       $('ev-icon').className = 'w-9 h-9 rounded-xl flex items-center justify-center text-base ' + evI;
 
       // ===== PHONE 2 (WITHOUT AI / DUMB SOLAR APP) UPDATES =====
-      $('noai-val-solar').innerText = stNo.solar + ' kW';
-      $('noai-val-load').innerText = stNo.load.toFixed(1) + ' kW';
+      $('noai-val-solar').innerText = stNo.solar + ' kW';$('noai-val-load').innerText = stNo.load.toFixed(1) + ' kW';
 
       const pctNo = Math.round(stNo.soc * 100), netNo = stNo.sToB - stNo.bToLoad;
-      $('noai-val-battery').innerText = pctNo + '%';
-      $('noai-batt-bar').style.width = pctNo + '%';
-      $('noai-batt-icon').className = 'fa-solid ' + battLevelIcon(pctNo);
-      $('noai-top-batt').className = 'fa-solid ' + battLevelIcon(pctNo) + (pctNo < 20 ? ' text-red-400' : ' text-amber-400');
+      $('noai-val-battery').innerText = pctNo + '\%';$('noai-batt-bar').style.width = pctNo + '%';
+      $('noai-batt-icon').className = 'fa-solid ' + battLevelIcon(pctNo);$('noai-top-batt').className = 'fa-solid ' + battLevelIcon(pctNo) + (pctNo < 20 ? ' text-red-400' : ' text-amber-400');
 
       if (netNo > 0.05) {
         $('noai-batt-pill').innerText = tr('Charging', 'Mengecas');
-        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white';
-        $('noai-batt-rate').innerText = `+${netNo.toFixed(1)} kW`;
-        $('noai-batt-desc').innerText = tr('Only charges from sun; never pre-charges for storms.', 'Hanya cas dari matahari; tiada pra-cas untuk ribut.');
+        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white';$('noai-batt-rate').innerText = `+${netNo.toFixed(1)} kW`;
+        $('noai-batt-desc').innerText = tr('Unoptimized charging; clips & wastes excess solar.', 'Cas tidak optimum; membazir lebihan solar.');
       } else if (netNo < -0.05) {
         $('noai-batt-pill').innerText = tr('Draining', 'Menyahcas');
-        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-600 text-white';
-        $('noai-batt-rate').innerText = `${netNo.toFixed(1)} kW`;
-        $('noai-batt-desc').innerText = stNo.peak
-          ? tr('Draining fast due to unscheduled負荷/EV.', 'Cepat habis kerana beban/EV tidak dijadualkan.')
-          : tr('Wasting battery during cheap night hours!', 'Membazir bateri semasa waktu malam yang murah!');
+        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-600 text-white';$('noai-batt-rate').innerText = `${netNo.toFixed(1)} kW`;
+        $('noai-batt-desc').innerText = tr('Draining fast due to unscheduled Evening AC + EV load!', 'Cepat habis kerana beban AC + EV tidak dijadualkan!');
       } else {
-        $('noai-batt-pill').innerText = pctNo <= 12 ? tr('Empty (10%)', 'Kosong (10%)') : tr('Full / Idle', 'Penuh / Rehat');
+        $('noai-batt-pill').innerText = pctNo <= 12 ? tr('Empty (10%)', 'Kosong (10%)') : tr('Idle', 'Rehat');
         $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-600 text-white';
-        $('noai-batt-rate').innerText = '0.0 kW';
-        $('noai-batt-desc').innerText = pctNo <= 12
-          ? tr('Battery depleted! Home forced to buy TNB power.', 'Bateri habis! Rumah terpaksa beli kuasa TNB.')
-          : tr('Battery full. Extra solar is wasted (clipped).', 'Bateri penuh. Lebihan solar terbuang begitu sahaja.');
+        $('noai-batt-rate').innerText = '0.0 kW';$('noai-batt-desc').innerText = pctNo <= 12
+          ? tr('Battery depleted! Forced to buy TNB grid power.', 'Bateri habis! Terpaksa beli kuasa grid TNB.')
+          : tr('No tariff scheduling.', 'Tiada penjadualan tarif.');
       }
 
-      // Dumb Banner explanation
-      if (stNo.peak && stNo.grid > 0.1) {
+      if (hour === 0) {
+        $('noai-title').innerText = tr('00:00 Midnight — New Billing Day Starts (RM 0.00)', '00:00 Tengah Malam — Hari Bil Baharu Bermula (RM 0.00)');$('noai-desc').innerText = tr('Battery already drained to 10% earlier. Will have to buy TNB power all morning.', 'Bateri sudah habis ke 10%. Terpaksa beli kuasa TNB sepanjang pagi.');
+      } else if (stNo.peak && stNo.grid > 0.1) {
         $('noai-title').innerText = tr(`Paying Expensive ${rp} sen TNB Peak!`, `Membayar Waktu Puncak TNB ${rp} sen yang Mahal!`);
-        $('noai-desc').innerText = tr(`Pulling ${stNo.grid.toFixed(1)} kW from TNB during Peak hours because battery was not reserved or EV started at 7PM.`, `Menarik ${stNo.grid.toFixed(1)} kW dari TNB waktu Puncak kerana bateri tidak disimpan atau EV dicaj pada 7 malam.`);
-      } else if (!stNo.peak && stNo.bToLoad > 0.1) {
-        $('noai-title').innerText = tr('Draining Battery on Cheap Night Tariff', 'Menghabiskan Bateri Semasa Tarif Malam Murah');
-        $('noai-desc').innerText = tr('Dumb inverter drains battery after midnight instead of saving it or using cheap 24.43 sen grid.', 'Inverter biasa menghabiskan bateri selepas tengah malam dan bukannya guna grid murah 24.43 sen.');
+        $('noai-desc').innerText = tr(`Pulling ${stNo.grid.toFixed(1)} kW from TNB during Peak hours because battery ran out & EV started at 6PM.`, `Menarik ${stNo.grid.toFixed(1)} kW dari TNB waktu Puncak kerana bateri habis & EV mula cas 6 petang.`);
       } else if (stNo.waste > 0.1) {
-        $('noai-title').innerText = tr('Wasting Midday Rooftop Solar', 'Membazir Solar Bumbung Tengah Hari');
-        $('noai-desc').innerText = tr(`Battery is full, so ${stNo.waste.toFixed(1)} kW of clean solar is clipped/wasted with zero township credit.`, `Bateri penuh, jadi ${stNo.waste.toFixed(1)} kW solar terbuang tanpa kredit perbandaran.`);
+        $('noai-title').innerText = tr('Wasting Midday Rooftop Solar', 'Membazir Solar Bumbung Tengah Hari');$('noai-desc').innerText = tr(`${stNo.waste.toFixed(1)} kW of clean solar is wasted with zero township sharing credit.`, `${stNo.waste.toFixed(1)} kW solar terbuang tanpa kredit perkongsian perbandaran.`);
       } else {
-        $('noai-title').innerText = tr('Standard Solar Self-Consumption', 'Penggunaan Solar Biasa');
-        $('noai-desc').innerText = tr('No weather forecast look-ahead or TNB Time-of-Use optimization.', 'Tiada ramalan cuaca atau pengoptimuman tarif masa penggunaan TNB.');
+        $('noai-title').innerText = tr('Buying Unscheduled TNB Grid Power', 'Membeli Kuasa Grid TNB Tanpa Jadual');$('noai-desc').innerText = tr('Battery empty from night before; pulling TNB grid power for morning loads.', 'Bateri kosong dari malam tadi; menarik kuasa TNB untuk beban pagi.');
       }
 
-      // Dumb EV Card
       if (evHours(false, dt).includes(hour)) {
         $('noai-ev-pill').innerText = tr('Peak Charging!', 'Cas Waktu Puncak!');
-        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-600 text-white whitespace-nowrap';
-        $('noai-ev-desc').innerText = tr(`Pulling ${EV_KW} kW during expensive 28.52 sen Peak!`, `Menarik ${EV_KW} kW semasa waktu Puncak 28.52 sen yang mahal!`);
+        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-600 text-white whitespace-nowrap';$('noai-ev-desc').innerText = tr(`Pulling ${EV_KW} kW during expensive 28.52 sen Peak!`, `Menarik ${EV_KW} kW semasa waktu Puncak 28.52 sen yang mahal!`);
       } else {
         $('noai-ev-pill').innerText = tr('Idle', 'Rehat');
-        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-500 text-white whitespace-nowrap';
-        $('noai-ev-desc').innerText = tr('Will charge immediately at 7PM Peak when plugged in.', 'Akan cas serta-merta pada 7 malam (Puncak) apabila dipalam.');
+        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-500 text-white whitespace-nowrap';$('noai-ev-desc').innerText = tr('Charges immediately at 6PM Peak when plugged in.', 'Mengecas serta-merta pada 6 petang (Puncak) apabila dipalam.');
       }
 
-      // Dumb Routing Bar
-      const noSolarShare = Math.round(stNo.sToLoad / stNo.load * 100), noBattShare = Math.round(stNo.bToLoad / stNo.load * 100);
-      const noGridShare = Math.max(0, 100 - noSolarShare - noBattShare);
-      $('noai-bar-solar').style.width = noSolarShare + '%'; $('noai-pct-solar').innerText = noSolarShare + '%';
-      $('noai-bar-batt').style.width = noBattShare + '%'; $('noai-pct-batt').innerText = noBattShare + '%';
-      $('noai-bar-grid').style.width = noGridShare + '%'; $('noai-pct-grid').innerText = noGridShare + '%';
-      $('noai-grid-badge').innerText = tr(`TNB Grid Draw: ${stNo.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${stNo.imp.toFixed(1)} kW`);
-      $('noai-val-waste').innerText = stNo.waste.toFixed(1) + ' kW';
-      $('noai-overpay').innerText = `+${fmtRM(saved)} Extra`;
+      const noTotalLoad = stNo.load > 0 ? stNo.load : 1;
+      const noSolarShare = hour === 0 ? 0 : Math.round(stNo.sToLoad / noTotalLoad * 100);
+      const noBattShare = hour === 0 ? 0 : Math.round(stNo.bToLoad / noTotalLoad * 100);
+      const noGridShare = hour === 0 ? 0 : Math.max(0, 100 - noSolarShare - noBattShare);
+      $('noai-bar-solar').style.width = noSolarShare + '%'; $('noai-pct-solar').innerText = noSolarShare + '\%';$('noai-bar-batt').style.width = noBattShare + '%'; $('noai-pct-batt').innerText = noBattShare + '\%';$('noai-bar-grid').style.width = noGridShare + '%'; $('noai-pct-grid').innerText = noGridShare + '\%';$('noai-grid-badge').innerText = tr(`TNB Grid Draw: ${stNo.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${stNo.imp.toFixed(1)} kW`);
+      $('noai-val-waste').innerText = stNo.waste.toFixed(1) + ' kW';$('noai-overpay').innerText = `+${fmtRM(saved)} Extra`;
       $('noai-month-loss').innerText = `RM ${Math.round(monthly)} / month`;
 
-      // Money, carbon, compare tab inside Phone 1
-      $('val-saved-today').innerText = fmtRM(saved);
-      $('val-month').innerText = tr(`RM ${Math.round(monthly)} / month`, `RM ${Math.round(monthly)} / bulan`);
-      $('val-co2').innerText = co2.toFixed(1) + ' kg CO₂';
-      $('val-ecopts').innerText = `🌱 +${Math.round(co2 * 3)} EcoPts`;
-      $('cmp-noai-cost').innerText = fmtRM(costNo);
-      $('cmp-ai-cost').innerText = fmtRM(costAI);
+      $('val-saved-today').innerText = fmtRM(saved);$('val-month').innerText = tr(`RM ${Math.round(monthly)} / month`, `RM ${Math.round(monthly)} / bulan`);
+      $('val-co2').innerText = co2.toFixed(1) + ' kg CO₂';$('val-ecopts').innerText = `🌱 +${Math.round(co2 * 3)} EcoPts`;
+      $('cmp-noai-cost').innerText = fmtRM(costNo);$('cmp-ai-cost').innerText = fmtRM(costAI);
 
       if (forecastChartInstance && !$('tab-forecast').classList.contains('hidden')) renderForecastChart();
     }
@@ -975,7 +996,7 @@
       updateRewards();
     }
 
-    // Auto-play automatically launches the 2-Phone Side-by-Side view!
+    // Auto-play starts cleanly from 00:00 (RM 0.00) at a slower 2.2s per hour pace!
     function toggleAutoPlay() {
       if (playTimer) {
         clearInterval(playTimer);
@@ -983,6 +1004,19 @@
         renderPlayBtn(false);
         return;
       }
+      setDualScreen(true);
+      switchTab('home');
+      const sl = $('time-slider');
+      sl.value = 0; // Reset to 00:00 so judges see RM 0.00 at the start of the day!
+      updateSimulation();
+      renderPlayBtn(true);
+      playTimer = setInterval(() => {
+        const nextHr = (parseInt(sl.value) + 1) % 24;
+        sl.value = nextHr;
+        updateSimulation();
+      }, 2200);
+    }
+    
       // Show both phones side-by-side and switch Phone 1 to Home tab so judges can watch both live!
       setDualScreen(true);
       switchTab('home');
