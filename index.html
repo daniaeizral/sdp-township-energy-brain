@@ -132,6 +132,34 @@
             <p id="ai-decision-desc" class="text-[11px] text-emerald-50 mt-0.5 leading-relaxed">
               Running home 100% on Solar + Battery. Sending surplus to Elmina Community Grid.
             </p>
+            <!-- Combined AI Brain: appliance and EV recommendations -->
+            <div class="mt-2.5 pt-2.5 border-t border-white/25" aria-live="polite">
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span id="appliance-heading" class="text-[10px] font-extrabold"><i class="fa-solid fa-lightbulb mr-1"></i>Smart Appliance Advice</span>
+                <span id="appliance-status" class="text-[9px] font-bold rounded-full px-2 py-0.5 bg-white/20 text-white">Checking</span>
+              </div>
+              <p id="appliance-tip" class="text-[11px] font-semibold leading-snug">Finding your best time...</p>
+              <div class="grid grid-cols-3 gap-1.5 mt-2">
+                <div class="rounded-lg bg-white/15 px-2 py-1.5 min-w-0">
+                  <p id="washer-label" class="text-[9px] font-semibold text-white/80">🧺 Washer</p>
+                  <p id="washer-time" class="text-[10px] font-extrabold leading-snug">—</p>
+                </div>
+                <div class="rounded-lg bg-white/15 px-2 py-1.5 min-w-0">
+                  <p id="dish-label" class="text-[9px] font-semibold text-white/80">🍽️ Dishwasher</p>
+                  <p id="dish-time" class="text-[10px] font-extrabold leading-snug">—</p>
+                </div>
+                <div class="rounded-lg bg-white/15 px-2 py-1.5 min-w-0">
+                  <p id="ev-label" class="text-[9px] font-semibold text-white/80">🚗 EV Charger</p>
+                  <p id="ev-best-time" class="text-[10px] font-extrabold leading-snug">10 PM</p>
+                </div>
+              </div>
+              <div class="flex items-center justify-between gap-2 mt-2">
+                <p id="appliance-reason" class="text-[9px] text-white/85 leading-snug flex-1"></p>
+                <span id="ev-pill" class="shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">EV Idle</span>
+              </div>
+              <p id="ev-desc" class="text-[9px] text-white/80 mt-1 leading-snug"></p>
+              <p id="appliance-disclaimer" class="text-[8px] text-white/60 mt-1">Simulation only • No remote control</p>
+            </div>
           </div>
 
           <!-- Telemetry Cards (Solar, Home Load) -->
@@ -192,18 +220,6 @@
             </div>
           </div>
 
-          <!-- EV Charger Card -->
-          <div class="bg-white p-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between gap-2">
-            <div class="flex items-center gap-2.5">
-              <div id="ev-icon" class="w-9 h-9 rounded-xl flex items-center justify-center text-base bg-slate-100 text-slate-500"><i class="fa-solid fa-car-side"></i></div>
-              <div>
-                <p class="text-[10px] text-slate-400 font-semibold uppercase">EV Charger</p>
-                <p id="ev-desc" class="text-[10px] text-slate-600 leading-snug">No EV session right now.</p>
-              </div>
-            </div>
-            <span id="ev-pill" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-500 text-white whitespace-nowrap">Idle</span>
-          </div>
-
           <!-- Active Power Source Flow Card -->
           <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
             <div class="flex justify-between items-center mb-1.5">
@@ -244,6 +260,11 @@
             <h2 class="text-xs font-bold text-slate-800 mb-1">24-Hour Solar vs. Home Demand Forecast</h2>
             <p class="text-[11px] text-slate-500 mb-2">AI predicts sunlight & schedules battery before TNB 2PM Peak.</p>
             <canvas id="forecastChart" height="170"></canvas>
+          </div>
+
+          <div class="bg-white p-3.5 rounded-2xl border border-emerald-200 shadow-sm">
+            <h3 id="appliance-schedule-heading" class="text-xs font-bold text-slate-800 mb-2">🧠 Suggested Appliance Schedule</h3>
+            <div id="appliance-schedule-list" class="space-y-2 text-[11px] text-slate-600"></div>
           </div>
 
           <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm space-y-2.5">
@@ -838,6 +859,64 @@
       return out;
     }
 
+     function updateApplianceAdvisor(hour, day) {
+       const dt = getDayType();
+       const candidates = day.filter(x => x.h >= 9 && x.h <= 16).map(x => ({...x, surplus: Math.max(0, x.solar - x.base - x.sToB)}));
+       const solarWindow = candidates.filter(x => x.surplus >= 0.8 && x.soc >= 0.35);
+       const bestSolar = solarWindow.length ? solarWindow.sort((a,b) => b.surplus - a.surplus)[0].h : null;
+       const fmtHour = h => lang === 'ms' ? String(h).padStart(2,'0') + ':00' : (h === 12 ? '12 PM' : h > 12 ? (h-12)+' PM' : h+' AM');
+       const solarSlot = bestSolar === null ? null : fmtHour(bestSolar) + '–' + fmtHour(bestSolar+1);
+       const offSlot = tr('10 PM onwards', '10 malam dan seterusnya');
+       const peak = isPeakAt(hour, dt);
+       const surplusNow = Math.max(0, day[hour].solar - day[hour].base - day[hour].sToB);
+       const solarGood = surplusNow >= 0.8 && day[hour].soc >= 0.35;
+       const nightCheap = hour >= 22 || hour < 7 || dt === 'weekend';
+       let status, tip, reason;
+       if (solarGood) {
+         status = tr('GOOD TIME NOW', 'MASA SESUAI SEKARANG');
+         tip = tr('🧺 Good time to run the washing machine using surplus rooftop solar.', '🧺 Masa sesuai untuk guna mesin basuh dengan lebihan tenaga solar.');
+         reason = tr(`Estimated available solar surplus: ${surplusNow.toFixed(1)} kW. Check your appliance power rating first.`, `Anggaran lebihan solar: ${surplusNow.toFixed(1)} kW. Semak kuasa peralatan dahulu.`);
+       } else if (peak) {
+         status = tr('WAIT IF POSSIBLE', 'TANGGUH JIKA BOLEH');
+         tip = tr('⏳ Delay flexible laundry and dishwasher cycles until a cheaper period.', '⏳ Tangguhkan cucian dan mesin pinggan ke waktu lebih murah.');
+         reason = tr('Weekday peak is 2 PM–10 PM in this demo. Preserve battery for essential home demand.', 'Waktu puncak hari bekerja ialah 2 petang–10 malam dalam demo ini. Simpan bateri untuk keperluan utama.');
+       } else if (nightCheap) {
+         status = tr('OFF-PEAK OPTION', 'PILIHAN LUAR PUNCAK');
+         tip = tr('🌙 Off-peak is suitable for flexible appliances if safe and convenient.', '🌙 Waktu luar puncak sesuai untuk peralatan fleksibel jika selamat dan praktikal.');
+         reason = tr('Use a delayed-start timer where appropriate; avoid leaving high-risk appliances running unattended.', 'Gunakan pemasa jika sesuai; elakkan membiarkan peralatan berisiko beroperasi tanpa pengawasan.');
+       } else {
+         status = tr('PLAN AHEAD', 'RANCANG AWAL');
+         tip = tr('☀️ Plan laundry for the strongest surplus-solar hour, if available.', '☀️ Rancang cucian pada waktu lebihan solar tertinggi, jika ada.');
+         reason = tr('Recommendations update with simulated weather, solar output, and battery charging.', 'Cadangan berubah mengikut simulasi cuaca, tenaga solar dan pengecasan bateri.');
+       }
+       $('appliance-heading').innerText = tr('Smart Appliance Advice', 'Cadangan Peralatan Pintar');
+       $('appliance-status').innerText = status;
+       $('appliance-status').className = 'text-[9px] font-bold rounded-full px-2 py-0.5 bg-white/20 text-white';
+       $('appliance-tip').innerText = tip;
+       $('appliance-reason').innerText = reason;
+       $('washer-label').innerText = tr('🧺 Washer', '🧺 Mesin basuh');
+       $('dish-label').innerText = tr('🍽️ Dishwasher', '🍽️ Mesin pinggan');
+       $('washer-time').innerText = solarSlot || offSlot;
+       $('dish-time').innerText = solarSlot || offSlot;
+       $('ev-label').innerText = tr('🚗 EV Charger', '🚗 Pengecas EV');
+       $('ev-best-time').innerText = dt === 'weekday' ? tr('10 PM+', '10 MLM+') : (solarSlot || offSlot);
+       $('appliance-disclaimer').innerText = tr('Simulation only • No remote appliance control', 'Simulasi sahaja • Tiada kawalan peralatan jarak jauh');
+       $('appliance-schedule-heading').innerText = tr('🧠 Suggested Appliance Schedule', '🧠 Cadangan Jadual Peralatan');
+       const entries = [
+         [tr('🧺 Washing machine', '🧺 Mesin basuh'), solarSlot || offSlot, solarSlot ? tr('Use spare solar generation', 'Guna lebihan tenaga solar') : tr('Low solar: choose off-peak', 'Solar rendah: pilih luar puncak')],
+         [tr('🍽️ Dishwasher', '🍽️ Mesin pinggan'), solarSlot || offSlot, tr('Run only when convenient and safe', 'Jalankan apabila sesuai dan selamat')],
+         [tr('🚗 EV charging', '🚗 Pengecasan EV'), dt === 'weekday' ? offSlot : tr('Off-peak / solar surplus', 'Luar puncak / lebihan solar'), tr('Subject to charger and vehicle settings', 'Bergantung pada tetapan pengecas dan kereta')]
+       ];
+       $('appliance-schedule-list').replaceChildren(...entries.map(([name,time,why]) => {
+         const el=document.createElement('div'); el.className='flex justify-between gap-2 border-b border-slate-100 pb-2';
+         const left=document.createElement('div'), right=document.createElement('b');
+         const n=document.createElement('p'), w=document.createElement('p');
+         n.className='font-bold text-slate-700'; n.textContent=name; w.className='text-[10px] text-slate-400'; w.textContent=why;
+         right.className='text-emerald-700 whitespace-nowrap text-right'; right.textContent=time;
+         left.append(n,w); el.append(left,right); return el;
+       }));
+     }
+
     function updateSimulation() {
       const hour = parseInt($('time-slider').value);
       const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
@@ -847,6 +926,7 @@
       const dt = getDayType(), isWeekend = dt === 'weekend';
       const ai = simulateDay(true), no = simulateDay(false);
       const st = ai[hour], stNo = no[hour];
+       updateApplianceAdvisor(hour, ai);
 
       $('sim-time-label').innerText = `${timeStr} (${st.peak ? '🔴 Peak 28.52s' : '🟢 Off-Peak 24.43s'})`;
 
@@ -977,9 +1057,9 @@
       let evL = tr('Idle', 'Rehat'), evC = 'bg-slate-500', evD = tr('No EV session right now.', 'Tiada sesi EV buat masa ini.'), evI = 'bg-slate-100 text-slate-500';
       if (evHours(true, dt).includes(hour)) { evL = tr('Charging', 'Mengecas'); evC = 'bg-emerald-600'; evI = 'bg-emerald-100 text-emerald-600'; evD = tr(`Smart-shifted to 10PM cheap tariff (${EV_KW} kW).`, `Dijadual ke tarif murah 10 malam (${EV_KW} kW).`); }
       else if (hour >= 18 && hour < 22 && !isWeekend) { evL = tr('Delayed', 'Ditangguh'); evC = 'bg-amber-500'; evI = 'bg-amber-100 text-amber-600'; evD = tr('Plugged in at 6PM. AI waits until 10:00 PM cheap tariff!', 'Dipalamkan 6PM. AI tunggu sehingga tarif murah 10:00 malam!'); }
-      $('ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full text-white whitespace-nowrap ' + evC;
+      $('ev-pill').className = 'shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full text-white ' + evC;
       $('ev-pill').innerText = evL; $('ev-desc').innerText = evD;
-      $('ev-icon').className = 'w-9 h-9 rounded-xl flex items-center justify-center text-base ' + evI;
+      // EV state is now shown within the unified AI Brain card.
 
       // ===== PHONE 2 (WITHOUT AI / DUMB SOLAR APP) UPDATES =====
       $('noai-val-solar').innerText = stNo.solar + ' kW';
