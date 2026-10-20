@@ -15,7 +15,7 @@
     @media (min-width: 768px) {
       .phone-frame {
         width: 375px;
-        height: 810px;
+        height: 820px;
         border-radius: 46px;
         border: 11px solid #1e293b;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 2px #334155;
@@ -104,7 +104,7 @@
           <div>
             <span class="text-[9px] uppercase tracking-wider text-emerald-300 font-bold block">⚡ Electricity Cost Used Today</span>
             <div class="flex items-baseline gap-2">
-              <span id="ai-live-bill" class="text-xl font-extrabold text-emerald-400">RM 4.20</span>
+              <span id="ai-live-bill" class="text-xl font-extrabold text-emerald-400">RM 0.00</span>
               <span id="ai-hour-delta" class="text-[10px] font-bold bg-emerald-800/80 text-emerald-200 px-1.5 py-0.5 rounded">+RM 0.00/hr</span>
             </div>
           </div>
@@ -121,9 +121,9 @@
         <!-- TAB 1: HOME SCREEN -->
         <div id="tab-home" class="space-y-2.5">
           <!-- AI Action Brain Banner -->
-          <div id="ai-banner" class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3 rounded-2xl shadow-md">
+          <div id="ai-banner" class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3 rounded-2xl shadow-md transition-all duration-300">
             <div class="flex items-center justify-between mb-0.5">
-              <span class="text-[10px] uppercase tracking-wider font-bold bg-white/20 px-2 py-0.5 rounded-full">
+              <span id="ai-mode-badge" class="text-[10px] uppercase tracking-wider font-bold bg-white/20 px-2 py-0.5 rounded-full">
                 <i class="fa-solid fa-microchip mr-1"></i> AI Brain Active
               </span>
               <span id="weather-pill" class="text-xs font-semibold">☀️ Sunny</span>
@@ -148,7 +148,7 @@
             </div>
           </div>
 
-          <!-- Battery Status Card -->
+          <!-- Battery Status Card + Manual Override Mode Control -->
           <div id="batt-card" class="bg-white p-3 rounded-2xl border-2 border-emerald-300 shadow-sm transition-colors duration-300">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2.5">
@@ -171,6 +171,25 @@
               <div id="batt-level-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 88%"></div>
             </div>
             <p id="batt-status-desc" class="text-[10px] text-slate-500 mt-1.5 leading-snug">Storing surplus solar for later.</p>
+
+            <!-- NEW: Interactive Battery Mode Control (AI Auto / Force Use / Hold) -->
+            <div class="mt-2.5 pt-2 border-t border-slate-100">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Battery Control Mode</span>
+                <span id="batt-mode-hint" class="text-[9px] font-bold text-emerald-600">Smart Tariff Optimization</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-[10px] font-extrabold">
+                <button id="bmode-auto" onclick="setBatteryMode('auto')" class="py-1.5 rounded-lg bg-emerald-600 text-white shadow-sm transition-all">
+                  🤖 AI Auto
+                </button>
+                <button id="bmode-use" onclick="setBatteryMode('use')" class="py-1.5 rounded-lg text-slate-600 hover:bg-white/60 transition-all">
+                  ⚡ Force Use
+                </button>
+                <button id="bmode-hold" onclick="setBatteryMode('hold')" class="py-1.5 rounded-lg text-slate-600 hover:bg-white/60 transition-all">
+                  ⏸️ Hold
+                </button>
+              </div>
+            </div>
           </div>
 
           <!-- EV Charger Card -->
@@ -260,57 +279,7 @@
           </div>
         </div>
 
-        <!-- TAB 3: COMPARE (WITH AI vs WITHOUT AI) -->
-        <div id="tab-compare" class="space-y-3 hidden">
-          <div class="bg-slate-900 text-white p-3.5 rounded-2xl shadow">
-            <span class="text-[11px] uppercase tracking-wider font-bold text-amber-400">Live Scenario Comparison</span>
-            <h2 id="cmp-scenario-title" class="text-sm font-bold mt-0.5">Situation: Normal Sunny Weekday</h2>
-            <p class="text-[11px] text-slate-300 mt-0.5">See how a standard solar home wastes money compared to Township Energy Brain.</p>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2.5">
-            <div class="bg-red-50 border border-red-200 p-3 rounded-xl">
-              <span class="text-[11px] font-extrabold uppercase text-red-700 bg-red-100 px-2 py-0.5 rounded">❌ Without AI</span>
-              <p class="text-xs font-bold text-slate-800 mt-2">Current System</p>
-              <p id="cmp-noai-behavior" class="text-[11px] text-slate-600 mt-1 leading-snug">
-                Drains battery too early; buys expensive 28.52 sen TNB power from 7PM–10PM.
-              </p>
-              <div class="mt-3 pt-2 border-t border-red-200">
-                <p class="text-[11px] text-slate-500">Bill So Far Today</p>
-                <p id="cmp-noai-cost" class="text-base font-extrabold text-red-600">RM 14.80</p>
-              </div>
-            </div>
-
-            <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl">
-              <span class="text-[11px] font-extrabold uppercase text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">✅ With AI Brain</span>
-              <p class="text-xs font-bold text-slate-800 mt-2">Smart SDP Home</p>
-              <p id="cmp-ai-behavior" class="text-[11px] text-slate-600 mt-1 leading-snug">
-                Saves battery for 6PM–10PM peak; shifts EV charging to 10PM cheap rate.
-              </p>
-              <div class="mt-3 pt-2 border-t border-emerald-200">
-                <p class="text-[11px] text-slate-500">Bill So Far Today</p>
-                <p id="cmp-ai-cost" class="text-base font-extrabold text-emerald-600">RM 6.20</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm space-y-2">
-            <h3 class="text-xs font-bold text-slate-800">Where the Difference Happens</h3>
-            <div id="cmp-diff-list" class="space-y-2 text-[11px]">
-              <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                <b class="text-slate-800">⏰ 12:00 PM – 2:00 PM:</b> Without AI wastes extra solar once battery hits 100%. <b>With AI</b> shares surplus with Elmina Township for credits.
-              </div>
-              <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                <b class="text-slate-800">⏰ 6:00 PM – 10:00 PM (Peak):</b> Without AI pays 28.52 sen/kWh for night AC. <b>With AI</b> pays RM 0 by discharging reserved battery.
-              </div>
-              <div class="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                <b class="text-slate-800">⏰ 10:00 PM Onwards:</b> Without AI keeps draining battery to 0%. <b>With AI</b> switches to cheap 24.43 sen TNB grid.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB 4: COMMUNITY SHARING & GREEN REWARDS -->
+        <!-- TAB 3: COMMUNITY SHARING & GREEN REWARDS -->
         <div id="tab-community" class="space-y-3 hidden">
           <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
             <div class="flex justify-between items-center">
@@ -350,7 +319,7 @@
 
       </div>
 
-      <!-- Bottom Navigation Bar -->
+      <!-- Bottom Navigation Bar (Clean 3-Tab Layout) -->
       <div class="bg-white border-t border-slate-200 px-3 py-2 flex justify-around items-center text-[11px] font-semibold text-slate-400 z-40">
         <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center gap-1 sdp-red-text font-bold">
           <i class="fa-solid fa-bolt text-base"></i>
@@ -359,10 +328,6 @@
         <button onclick="switchTab('forecast')" id="nav-forecast" class="flex flex-col items-center gap-1">
           <i class="fa-solid fa-chart-line text-base"></i>
           <span>AI Schedule</span>
-        </button>
-        <button onclick="switchTab('compare')" id="nav-compare" class="flex flex-col items-center gap-1">
-          <i class="fa-solid fa-scale-balanced text-base"></i>
-          <span>AI vs No-AI</span>
         </button>
         <button onclick="switchTab('community')" id="nav-community" class="flex flex-col items-center gap-1">
           <i class="fa-solid fa-seedling text-base"></i>
@@ -403,7 +368,7 @@
           <div>
             <span class="text-[9px] uppercase tracking-wider text-red-300 font-bold block">💸 Electricity Cost Used Today</span>
             <div class="flex items-baseline gap-2">
-              <span id="noai-live-bill" class="text-xl font-extrabold text-red-400">RM 12.80</span>
+              <span id="noai-live-bill" class="text-xl font-extrabold text-red-400">RM 8.60</span>
               <span id="noai-hour-delta" class="text-[10px] font-bold bg-red-900 text-red-200 px-1.5 py-0.5 rounded">+RM 1.98/hr</span>
             </div>
           </div>
@@ -468,6 +433,12 @@
             <div id="noai-batt-bar" class="bg-red-500 h-full rounded-full transition-all duration-500" style="width: 10%"></div>
           </div>
           <p id="noai-batt-desc" class="text-[10px] text-slate-500 mt-1.5 leading-snug">No pre-charging or peak reservation.</p>
+
+          <!-- Disabled Mode Bar to contrast with AI App -->
+          <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-400 font-bold uppercase">
+            <span>Battery Control Mode</span>
+            <span class="text-red-500"><i class="fa-solid fa-lock mr-1"></i> Fixed Self-Use Only</span>
+          </div>
         </div>
 
         <!-- Dumb EV Charger Card -->
@@ -476,7 +447,7 @@
             <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base bg-red-50 text-red-500"><i class="fa-solid fa-plug-circle-exclamation"></i></div>
             <div>
               <p class="text-[10px] text-slate-400 font-semibold uppercase">EV Charger (Unscheduled)</p>
-              <p id="noai-ev-desc" class="text-[10px] text-slate-600 leading-snug">Starts immediately at 7PM Peak when plugged in.</p>
+              <p id="noai-ev-desc" class="text-[10px] text-slate-600 leading-snug">Starts immediately at 6PM Peak when plugged in.</p>
             </div>
           </div>
           <span id="noai-ev-pill" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-500 text-white whitespace-nowrap">Idle</span>
@@ -543,10 +514,11 @@
       </div>
       <input id="time-slider" type="range" min="0" max="23" value="14" class="w-full accent-red-500 cursor-pointer" oninput="updateSimulation()" />
       <div class="flex justify-between text-[11px] text-slate-400 mt-1">
-        <span>08:00 (Morning)</span>
-        <span>14:00 (Afternoon)</span>
-        <span>19:00 (Evening)</span>
-        <span>22:00 (Night)</span>
+        <span>00:00 (Start)</span>
+        <span>08:00</span>
+        <span>14:00 (Peak)</span>
+        <span>19:00</span>
+        <span>22:00</span>
       </div>
     </div>
 
@@ -564,7 +536,7 @@
     <div class="mb-4 p-3 rounded-2xl bg-slate-900/90 border border-slate-700 flex justify-between items-center">
       <div>
         <span class="text-[10px] text-emerald-400 font-bold uppercase block">✅ SDP AI Bill</span>
-        <span id="sim-ai-bill" class="text-base font-extrabold text-white">RM 4.20</span>
+        <span id="sim-ai-bill" class="text-base font-extrabold text-white">RM 0.00</span>
       </div>
       <div class="text-center px-2">
         <span class="text-[10px] text-amber-400 font-extrabold uppercase block">⚡ Saved Today</span>
@@ -572,7 +544,7 @@
       </div>
       <div class="text-right">
         <span class="text-[10px] text-red-400 font-bold uppercase block">❌ Dumb App Bill</span>
-        <span id="sim-noai-bill" class="text-base font-extrabold text-red-400">RM 12.80</span>
+        <span id="sim-noai-bill" class="text-base font-extrabold text-red-400">RM 8.60</span>
       </div>
     </div>
 
@@ -586,7 +558,7 @@
       </div>
     </div>
 
-    <!-- Pre-Built Situation Presets (For Comparison) -->
+    <!-- Pre-Built Situation Presets (Opens 2-Phone View Directly) -->
     <div class="border-t border-slate-700 pt-3">
       <label class="text-xs font-semibold block mb-2 text-emerald-400">⚡ Test "With AI vs Without AI" Situations:</label>
       <div class="space-y-1.5 text-xs">
@@ -610,10 +582,11 @@
   <script>
     let currentWeather = 'sunny';
     let dualMode = false;
+    let batteryMode = 'auto'; // 'auto' | 'use' | 'hold'
     let lang = 'en';
     try { if (localStorage.getItem('sdp-lang') === 'ms') lang = 'ms'; } catch (e) {}
     const tr = (en, ms) => (lang === 'ms' ? ms : en);
-    let forcedDayType = 'weekday'; // Default to weekday so peak/off-peak price jumps are crystal clear
+    let forcedDayType = 'weekday';
     function getDayType() {
       if (forcedDayType) return forcedDayType;
       const d = new Date().getDay();
@@ -646,6 +619,23 @@
       return 'fa-battery-empty';
     }
 
+    function setBatteryMode(mode) {
+      batteryMode = mode;
+      const modes = {
+        auto: { btn: 'bg-emerald-600 text-white shadow-sm', hint: tr('Smart Tariff Optimization', 'Pengoptimuman Tarif Pintar'), color: 'text-emerald-600' },
+        use:  { btn: 'bg-amber-500 text-white shadow-sm',   hint: tr('Manual Override: Discharging Now', 'Manual: Nyahcas Sekarang'), color: 'text-amber-600' },
+        hold: { btn: 'bg-slate-700 text-white shadow-sm',   hint: tr('Manual Override: Battery Locked', 'Manual: Bateri Dikunci'), color: 'text-slate-600' }
+      };
+      ['auto', 'use', 'hold'].forEach(k => {
+        const el = document.getElementById('bmode-' + k);
+        el.className = 'py-1.5 rounded-lg transition-all ' + (k === mode ? modes[k].btn : 'text-slate-600 hover:bg-white/60');
+      });
+      const hintEl = document.getElementById('batt-mode-hint');
+      hintEl.innerText = modes[mode].hint;
+      hintEl.className = 'text-[9px] font-bold ' + modes[mode].color;
+      updateSimulation();
+    }
+
     function renderBattery(pct, status, kw, desc) {
       const c = BATT_STATUS[status];
       const icon = battLevelIcon(pct);
@@ -662,7 +652,7 @@
       rateEl.className = 'text-[10px] font-bold mt-0.5 ' + c.rate;
       rateEl.innerText = status === 'charging' ? `+${kw.toFixed(1)} kW ${tr('in', 'masuk')}`
                        : status === 'inuse'    ? `-${kw.toFixed(1)} kW ${tr('out', 'keluar')}`
-                       : tr('Idle • 0.0 kW', 'Rehat • 0.0 kW');
+                       : tr('Hold • 0.0 kW', 'Tunggu • 0.0 kW');
       const bar = document.getElementById('batt-level-bar');
       bar.className = 'h-full rounded-full transition-all duration-500 ' + c.bar;
       bar.style.width = pct + '%';
@@ -674,7 +664,7 @@
     let forecastChartInstance = null;
 
     function switchTab(tab) {
-      ['home', 'forecast', 'compare', 'community'].forEach(t => {
+      ['home', 'forecast', 'community'].forEach(t => {
         document.getElementById('tab-' + t).classList.add('hidden');
         document.getElementById('nav-' + t).classList.remove('sdp-red-text', 'font-bold');
       });
@@ -724,6 +714,7 @@
 
     function triggerPreset(num) {
       if (playTimer) toggleAutoPlay();
+      setBatteryMode('auto');
       setDualScreen(true);
       switchTab('home');
       if (num === 1) {
@@ -741,8 +732,7 @@
       }
     }
 
-    // ===== Simulation engine =====
-// ===== Simulation engine (FIXED: Starts at RM 0.00 at 00:00 & AI Always Wins) =====
+    // ===== Simulation engine (Starts at RM 0.00 at 00:00 + Supports Manual Battery Mode) =====
     const PEAK_RATE = 0.2852, OFF_RATE = 0.2443, EXPORT_CREDIT = 0.20; // RM per kWh
     const BATT_CAP = 13.5, RESERVE = 0.10, MAX_CHG = 3.8, MAX_DIS = 4.2;
     const EV_KW = 3.6, CO2_FACTOR = 0.585, ECO_BASE = 1240;
@@ -768,12 +758,10 @@
     }
 
     const isPeakAt = (h, dt) => dt === 'weekday' && h >= 14 && h < 22;
-    // Dumb app charges EV at 18:00-20:00 (Peak!); AI delays EV to 22:00-23:00 (Cheap Off-Peak)
     const evHours = (ai, dt) => (ai && dt === 'weekday') ? [22, 23] : [18, 19];
 
-    function simulateDay(ai) {
+    function simulateDay(ai, selectedHour = -1) {
       const dt = getDayType();
-      // AI preserved 45% battery overnight; Dumb app already drained its battery to 10% reserve
       let soc = ai ? 0.45 : 0.10;
       const out = [];
 
@@ -793,27 +781,37 @@
         const stored = soc * BATT_CAP, avail = Math.max(0, stored - RESERVE * BATT_CAP), room = BATT_CAP - stored;
         let sToB = 0, gToB = 0, bToLoad = 0, exp = 0, waste = 0, grid = 0;
 
+        // Check if manual battery override is active on the AI phone
+        const modeNow = (ai && (h === selectedHour || selectedHour === -1)) ? batteryMode : 'auto';
+
         if (rem > 0) {
-          // Dumb inverter only charges slowly & clips excess solar; AI charges smartly & shares surplus
           const chgLimit = ai ? MAX_CHG : 2.0;
-          sToB = Math.min(rem, chgLimit, room);
+          // In 'use' override mode, don't charge battery; export surplus instead
+          sToB = (modeNow === 'use') ? 0 : Math.min(rem, chgLimit, room);
           if (ai && sharingOn) exp = rem - sToB;
           else waste = rem - sToB;
         }
 
         if (need > 0) {
           if (ai) {
-            // AI uses battery during expensive Peak OR early morning so morning bill stays lower than Dumb app
-            if (peak || h <= 8) bToLoad = Math.min(need, MAX_DIS, avail);
+            if (modeNow === 'hold') {
+              // Manual HOLD: Lock battery, do not discharge
+              bToLoad = 0;
+            } else if (modeNow === 'use') {
+              // Manual FORCE USE: Discharge battery immediately regardless of tariff time
+              bToLoad = Math.min(need, MAX_DIS, avail);
+            } else {
+              // AI AUTO: Use battery during expensive Peak OR early morning
+              if (peak || h <= 8) bToLoad = Math.min(need, MAX_DIS, avail);
+            }
           } else {
-            // Dumb app blindly drains whatever tiny battery it has left before Evening Peak
             bToLoad = Math.min(need, MAX_DIS, avail);
           }
           grid = need - bToLoad;
         }
 
-        // AI ONLY pre-charges from cheap TNB grid if weather forecast is Stormy/Rainy (never on Sunny days!)
-        if (ai && currentWeather === 'rainy' && dt === 'weekday' && h >= 10 && h < 14) {
+        // AI pre-charges from cheap TNB grid only on Stormy/Rainy days before 2PM
+        if (ai && modeNow === 'auto' && currentWeather === 'rainy' && dt === 'weekday' && h >= 10 && h < 14) {
           gToB = Math.max(0, Math.min(2.2, room - sToB));
         }
 
@@ -833,7 +831,7 @@
       $('noai-status-time').innerText = timeStr;
 
       const dt = getDayType(), isWeekend = dt === 'weekend';
-      const ai = simulateDay(true), no = simulateDay(false);
+      const ai = simulateDay(true, hour), no = simulateDay(false, hour);
       const st = ai[hour], stNo = no[hour];
 
       $('sim-time-label').innerText = `${timeStr} (${st.peak ? '🔴 Peak 28.52s' : '🟢 Off-Peak 24.43s'})`;
@@ -857,48 +855,81 @@
       $('ai-tariff-pill').innerText = st.peak ? `Peak ${rp}s` : `Cheap ${rc}s`;
       $('ai-saved-badge').innerText = `${tr('Saved', 'Jimat')} ${fmtRM(saved)}`;
 
-      $('noai-live-bill').innerText = fmtRM(costNo);$('noai-hour-delta').innerText = hour === 0 ? 'RM 0.00/hr (Start)' : `+RM ${stNo.cost.toFixed(2)}/hr`;
+      $('noai-live-bill').innerText = fmtRM(costNo);
+      $('noai-hour-delta').innerText = hour === 0 ? 'RM 0.00/hr (Start)' : `+RM ${stNo.cost.toFixed(2)}/hr`;
       $('noai-tariff-pill').className = 'text-[10px] font-extrabold px-2 py-0.5 rounded text-white uppercase ' + (stNo.peak ? 'bg-red-600' : 'bg-emerald-600');
       $('noai-tariff-pill').innerText = stNo.peak ? `Peak ${rp}s` : `Cheap ${rc}s`;
       $('noai-extra-badge').innerText = `+${fmtRM(saved)} ${tr('wasted', 'bazir')}`;
 
       // Judge Control Panel Scoreboard
       $('sim-ai-bill').innerText = fmtRM(costAI);
-      $('sim-noai-bill').innerText = fmtRM(costNo);$('sim-diff-bill').innerText = fmtRM(saved);
+      $('sim-noai-bill').innerText = fmtRM(costNo);
+      $('sim-diff-bill').innerText = fmtRM(saved);
 
       // ===== PHONE 1 (SDP AI BRAIN) UPDATES =====
       const pct = Math.round(st.soc * 100), net = st.sToB + st.gToB - st.bToLoad;
-      const status = net > 0.05 ? 'charging' : (net < -0.05 ? 'inuse' : 'hold');
+      let status = net > 0.05 ? 'charging' : (net < -0.05 ? 'inuse' : 'hold');
+      if (batteryMode === 'hold' && status !== 'charging') status = 'hold';
+      if (batteryMode === 'use' && st.bToLoad > 0.01) status = 'inuse';
+
       let battDesc;
-      if (status === 'charging') battDesc = st.gToB > 0.05 ? tr('Storm forecast ahead: Pre-charging on cheap TNB tariff.', 'Ramalan ribut: Pra-cas guna tarif TNB murah.') : tr('Storing free rooftop solar for the 2PM–10PM Peak.', 'Menyimpan solar bumbung percuma untuk Puncak 2PM–10PM.');
-      else if (status === 'inuse') battDesc = st.solar > 0.05 ? tr('Blending stored battery with solar to pay RM 0 during Peak.', 'Menggabungkan bateri & solar untuk bayar RM 0 waktu Puncak.') : tr('Discharging stored battery so home pays RM 0 to TNB.', 'Menyahcas bateri supaya rumah bayar RM 0 kepada TNB.');
-      else battDesc = tr('Battery reserved for Peak hours. Day starts at RM 0.00.', 'Bateri disimpan untuk waktu Puncak. Hari bermula pada RM 0.00.');
+      if (batteryMode === 'hold') {
+        battDesc = tr('Manual HOLD active: Battery is locked & preserved. Home uses Solar/Grid.', 'Mod TUNGGU manual aktif: Bateri dikunci & disimpan.');
+      } else if (batteryMode === 'use') {
+        battDesc = st.bToLoad > 0.05
+          ? tr('Manual FORCE USE active: Discharging battery immediately to power home.', 'Mod GUNA PAKSA aktif: Menyahcas bateri serta-merta.')
+          : tr('Manual FORCE USE active: Solar is already covering 100% of home load.', 'Mod GUNA PAKSA aktif: Solar sudah menampung 100% beban rumah.');
+      } else if (status === 'charging') {
+        battDesc = st.gToB > 0.05 ? tr('Storm forecast ahead: Pre-charging on cheap TNB tariff.', 'Ramalan ribut: Pra-cas guna tarif TNB murah.') : tr('Storing free rooftop solar for the 2PM–10PM Peak.', 'Menyimpan solar bumbung percuma untuk Puncak 2PM–10PM.');
+      } else if (status === 'inuse') {
+        battDesc = st.solar > 0.05 ? tr('Blending stored battery with solar to pay RM 0 during Peak.', 'Menggabungkan bateri & solar untuk bayar RM 0 waktu Puncak.') : tr('Discharging stored battery so home pays RM 0 to TNB.', 'Menyahcas bateri supaya rumah bayar RM 0 kepada TNB.');
+      } else {
+        battDesc = tr('Battery reserved for Peak hours. Day starts at RM 0.00.', 'Bateri disimpan untuk waktu Puncak. Hari bermula pada RM 0.00.');
+      }
       renderBattery(pct, status, Math.abs(net), battDesc);
 
+      // Banner styling & text based on AI Auto vs Manual Override
+      const bannerEl = $('ai-banner');
+      const badgeEl = $('ai-mode-badge');
       let t, d;
-      if (hour === 0) {
-        t = tr('00:00 Midnight — New Billing Day Starts (RM 0.00)', '00:00 Tengah Malam — Hari Bil Baharu Bermula (RM 0.00)');
-        d = tr('Daily electricity counters reset to RM 0.00. AI has 45% battery reserved for morning.', 'Kiraan bil harian diset semula ke RM 0.00. AI mempunyai 45% bateri tersimpan.');
-      } else if (st.peak) {
-        if (st.grid < 0.05 && st.bToLoad < 0.05) {
-          t = tr(`Avoiding Expensive ${rp} sen TNB Peak`, `Mengelak TNB Waktu Puncak ${rp} sen yang Mahal`);
-          d = tr(`Running 100% on rooftop solar.${st.sToB > 0.05 ? ' Charging battery' : ''}${st.exp > 0.05 ? ` & exporting ${st.exp.toFixed(1)} kW to township` : ''}.`, `Guna 100% solar bumbung.${st.sToB > 0.05 ? ' Mengecas bateri' : ''}${st.exp > 0.05 ? ` & berkongsi ${st.exp.toFixed(1)} kW dengan perbandaran` : ''}.`);
-        } else if (st.grid < 0.05) {
-          t = st.solar > 0.05 ? tr('Smart Peak Shield Active (Solar + Battery)', 'Perisai Puncak Pintar Aktif (Solar + Bateri)') : tr('Evening Peak: 100% Battery Power (RM 0/hr)', 'Puncak Petang: 100% Kuasa Bateri (RM 0/jam)');
-          d = tr(`TNB is expensive (${rp} sen), so AI powers the home using stored solar battery!`, `TNB mahal (${rp} sen), jadi AI membekalkan kuasa rumah guna bateri solar!`);
-        } else {
-          t = tr('Peak Protection Active', 'Perlindungan Waktu Puncak Aktif');
-          d = tr('Battery covering maximum load to minimize TNB peak tariff.', 'Bateri menampung beban maksimum untuk meminimumkan tarif puncak.');
-        }
-      } else if (st.gToB > 0.05) {
-        t = tr('Storm Ahead: Pre-Charging Battery on Cheap Tariff', 'Ribut Dijangka: Pra-Cas Bateri pada Tarif Murah');
-        d = tr(`Weather is stormy. AI tops up battery at cheap ${rc} sen before 2:00 PM Peak hits.`, `Cuaca ribut. AI tambah cas bateri pada kadar murah ${rc} sen sebelum Puncak 2:00 petang.`);
-      } else if (st.exp > 0.05) {
-        t = tr('100% Free Solar + Earning Township Credits', '100% Solar Percuma + Jana Kredit Perbandaran');
-        d = tr(`Home pays RM 0.00/hr and earns credit by sharing ${st.exp.toFixed(1)} kW with Elmina Grid.`, `Rumah bayar RM 0.00/jam dan jana kredit dengan berkongsi ${st.exp.toFixed(1)} kW.`);
+
+      if (batteryMode === 'hold') {
+        bannerEl.className = 'bg-gradient-to-r from-slate-700 to-slate-800 text-white p-3 rounded-2xl shadow-md transition-all duration-300';
+        badgeEl.innerHTML = '<i class="fa-solid fa-hand mr-1"></i> ' + tr('Manual Override: HOLD', 'Kawalan Manual: TUNGGU');
+        t = tr('Battery Locked on Standby (Reserve Mode)', 'Bateri Dikunci dalam Mod Tunggu (Simpanan)');
+        d = tr(`Holding battery at ${pct}% for backup. Home draws ${st.imp.toFixed(1)} kW from TNB grid.`, `Menyimpan bateri pada ${pct}%. Rumah menarik ${st.imp.toFixed(1)} kW dari grid TNB.`);
+      } else if (batteryMode === 'use') {
+        bannerEl.className = 'bg-gradient-to-r from-amber-500 to-orange-600 text-white p-3 rounded-2xl shadow-md transition-all duration-300';
+        badgeEl.innerHTML = '<i class="fa-solid fa-bolt mr-1"></i> ' + tr('Manual Override: FORCE USE', 'Kawalan Manual: GUNA PAKSA');
+        t = tr('Manual Battery Discharge Active', 'Nyahcas Bateri Manual Aktif');
+        d = tr(`Forcing battery to power home right now (${st.bToLoad.toFixed(1)} kW out). TNB Grid draw: ${st.imp.toFixed(1)} kW.`, `Memaksa bateri membekalkan kuasa rumah sekarang (${st.bToLoad.toFixed(1)} kW keluar).`);
       } else {
-        t = tr(`Off-Peak Smart Optimization (${rc} sen)`, `Pengoptimuman Pintar Luar Puncak (${rc} sen)`);
-        d = tr('Running efficiently and scheduling EV charging for lowest night tariff.', 'Beroperasi secara cekap dan menjadualkan EV pada tarif malam terendah.');
+        bannerEl.className = 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3 rounded-2xl shadow-md transition-all duration-300';
+        badgeEl.innerHTML = '<i class="fa-solid fa-microchip mr-1"></i> ' + tr('AI Brain Active', 'AI Brain Aktif');
+        if (hour === 0) {
+          t = tr('00:00 Midnight — New Billing Day Starts (RM 0.00)', '00:00 Tengah Malam — Hari Bil Baharu Bermula (RM 0.00)');
+          d = tr('Daily electricity counters reset to RM 0.00. AI has 45% battery reserved for morning.', 'Kiraan bil harian diset semula ke RM 0.00. AI mempunyai 45% bateri tersimpan.');
+        } else if (st.peak) {
+          if (st.grid < 0.05 && st.bToLoad < 0.05) {
+            t = tr(`Avoiding Expensive ${rp} sen TNB Peak`, `Mengelak TNB Waktu Puncak ${rp} sen yang Mahal`);
+            d = tr(`Running 100% on rooftop solar.${st.sToB > 0.05 ? ' Charging battery' : ''}${st.exp > 0.05 ? ` & exporting ${st.exp.toFixed(1)} kW to township` : ''}.`, `Guna 100% solar bumbung.${st.sToB > 0.05 ? ' Mengecas bateri' : ''}${st.exp > 0.05 ? ` & berkongsi ${st.exp.toFixed(1)} kW dengan perbandaran` : ''}.`);
+          } else if (st.grid < 0.05) {
+            t = st.solar > 0.05 ? tr('Smart Peak Shield Active (Solar + Battery)', 'Perisai Puncak Pintar Aktif (Solar + Bateri)') : tr('Evening Peak: 100% Battery Power (RM 0/hr)', 'Puncak Petang: 100% Kuasa Bateri (RM 0/jam)');
+            d = tr(`TNB is expensive (${rp} sen), so AI powers the home using stored solar battery!`, `TNB mahal (${rp} sen), jadi AI membekalkan kuasa rumah guna bateri solar!`);
+          } else {
+            t = tr('Peak Protection Active', 'Perlindungan Waktu Puncak Aktif');
+            d = tr('Battery covering maximum load to minimize TNB peak tariff.', 'Bateri menampung beban maksimum untuk meminimumkan tarif puncak.');
+          }
+        } else if (st.gToB > 0.05) {
+          t = tr('Storm Ahead: Pre-Charging Battery on Cheap Tariff', 'Ribut Dijangka: Pra-Cas Bateri pada Tarif Murah');
+          d = tr(`Weather is stormy. AI tops up battery at cheap ${rc} sen before 2:00 PM Peak hits.`, `Cuaca ribut. AI tambah cas bateri pada kadar murah ${rc} sen sebelum Puncak 2:00 petang.`);
+        } else if (st.exp > 0.05) {
+          t = tr('100% Free Solar + Earning Township Credits', '100% Solar Percuma + Jana Kredit Perbandaran');
+          d = tr(`Home pays RM 0.00/hr and earns credit by sharing ${st.exp.toFixed(1)} kW with Elmina Grid.`, `Rumah bayar RM 0.00/jam dan jana kredit dengan berkongsi ${st.exp.toFixed(1)} kW.`);
+        } else {
+          t = tr(`Off-Peak Smart Optimization (${rc} sen)`, `Pengoptimuman Pintar Luar Puncak (${rc} sen)`);
+          d = tr('Running efficiently and scheduling EV charging for lowest night tariff.', 'Beroperasi secara cekap dan menjadualkan EV pada tarif malam terendah.');
+        }
       }
       $('ai-decision-title').innerText = t;
       $('ai-decision-desc').innerText = d;
@@ -906,13 +937,15 @@
       const wLabel = currentWeather === 'sunny' ? tr('☀️ Sunny', '☀️ Cerah') : (currentWeather === 'cloudy' ? tr('⛅ Cloudy', '⛅ Mendung') : tr('🌧️ Stormy', '🌧️ Ribut'));
       $('weather-pill').innerText = wLabel;
       $('noai-weather-pill').innerText = wLabel;
-      $('val-solar').innerText = st.solar + ' kW';$('val-load').innerText = st.load.toFixed(1) + ' kW';
+      $('val-solar').innerText = st.solar + ' kW';
+      $('val-load').innerText = st.load.toFixed(1) + ' kW';
 
       const totalLoad = st.load > 0 ? st.load : 1;
       const solarShare = hour === 0 ? 0 : Math.round(st.sToLoad / totalLoad * 100);
       const battShare = hour === 0 ? 100 : Math.round(st.bToLoad / totalLoad * 100);
       const gridShare = hour === 0 ? 0 : Math.max(0, 100 - solarShare - battShare);
-      [['solar', solarShare], ['batt', battShare], ['grid', gridShare]].forEach(([k, v]) => { $('bar-' + k).style.width = v + '%'; $('pct-' + k).innerText = v + '\%'; });$('grid-draw-badge').innerText = tr(`TNB Grid Draw: ${st.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${st.imp.toFixed(1)} kW`);
+      [['solar', solarShare], ['batt', battShare], ['grid', gridShare]].forEach(([k, v]) => { $('bar-' + k).style.width = v + '%'; $('pct-' + k).innerText = v + '%'; });
+      $('grid-draw-badge').innerText = tr(`TNB Grid Draw: ${st.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${st.imp.toFixed(1)} kW`);
       $('val-export').innerText = sharingOn ? st.exp.toFixed(1) + ' kW' : tr('Sharing off', 'Perkongsian dimatikan');
 
       // EV card (Phone 1)
@@ -924,58 +957,74 @@
       $('ev-icon').className = 'w-9 h-9 rounded-xl flex items-center justify-center text-base ' + evI;
 
       // ===== PHONE 2 (WITHOUT AI / DUMB SOLAR APP) UPDATES =====
-      $('noai-val-solar').innerText = stNo.solar + ' kW';$('noai-val-load').innerText = stNo.load.toFixed(1) + ' kW';
+      $('noai-val-solar').innerText = stNo.solar + ' kW';
+      $('noai-val-load').innerText = stNo.load.toFixed(1) + ' kW';
 
       const pctNo = Math.round(stNo.soc * 100), netNo = stNo.sToB - stNo.bToLoad;
-      $('noai-val-battery').innerText = pctNo + '\%';$('noai-batt-bar').style.width = pctNo + '%';
-      $('noai-batt-icon').className = 'fa-solid ' + battLevelIcon(pctNo);$('noai-top-batt').className = 'fa-solid ' + battLevelIcon(pctNo) + (pctNo < 20 ? ' text-red-400' : ' text-amber-400');
+      $('noai-val-battery').innerText = pctNo + '%';
+      $('noai-batt-bar').style.width = pctNo + '%';
+      $('noai-batt-icon').className = 'fa-solid ' + battLevelIcon(pctNo);
+      $('noai-top-batt').className = 'fa-solid ' + battLevelIcon(pctNo) + (pctNo < 20 ? ' text-red-400' : ' text-amber-400');
 
       if (netNo > 0.05) {
         $('noai-batt-pill').innerText = tr('Charging', 'Mengecas');
-        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white';$('noai-batt-rate').innerText = `+${netNo.toFixed(1)} kW`;
+        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white';
+        $('noai-batt-rate').innerText = `+${netNo.toFixed(1)} kW`;
         $('noai-batt-desc').innerText = tr('Unoptimized charging; clips & wastes excess solar.', 'Cas tidak optimum; membazir lebihan solar.');
       } else if (netNo < -0.05) {
         $('noai-batt-pill').innerText = tr('Draining', 'Menyahcas');
-        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-600 text-white';$('noai-batt-rate').innerText = `${netNo.toFixed(1)} kW`;
+        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-600 text-white';
+        $('noai-batt-rate').innerText = `${netNo.toFixed(1)} kW`;
         $('noai-batt-desc').innerText = tr('Draining fast due to unscheduled Evening AC + EV load!', 'Cepat habis kerana beban AC + EV tidak dijadualkan!');
       } else {
         $('noai-batt-pill').innerText = pctNo <= 12 ? tr('Empty (10%)', 'Kosong (10%)') : tr('Idle', 'Rehat');
         $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-600 text-white';
-        $('noai-batt-rate').innerText = '0.0 kW';$('noai-batt-desc').innerText = pctNo <= 12
+        $('noai-batt-rate').innerText = '0.0 kW';
+        $('noai-batt-desc').innerText = pctNo <= 12
           ? tr('Battery depleted! Forced to buy TNB grid power.', 'Bateri habis! Terpaksa beli kuasa grid TNB.')
           : tr('No tariff scheduling.', 'Tiada penjadualan tarif.');
       }
 
       if (hour === 0) {
-        $('noai-title').innerText = tr('00:00 Midnight — New Billing Day Starts (RM 0.00)', '00:00 Tengah Malam — Hari Bil Baharu Bermula (RM 0.00)');$('noai-desc').innerText = tr('Battery already drained to 10% earlier. Will have to buy TNB power all morning.', 'Bateri sudah habis ke 10%. Terpaksa beli kuasa TNB sepanjang pagi.');
+        $('noai-title').innerText = tr('00:00 Midnight — New Billing Day Starts (RM 0.00)', '00:00 Tengah Malam — Hari Bil Baharu Bermula (RM 0.00)');
+        $('noai-desc').innerText = tr('Battery already drained to 10% earlier. Will have to buy TNB power all morning.', 'Bateri sudah habis ke 10%. Terpaksa beli kuasa TNB sepanjang pagi.');
       } else if (stNo.peak && stNo.grid > 0.1) {
         $('noai-title').innerText = tr(`Paying Expensive ${rp} sen TNB Peak!`, `Membayar Waktu Puncak TNB ${rp} sen yang Mahal!`);
         $('noai-desc').innerText = tr(`Pulling ${stNo.grid.toFixed(1)} kW from TNB during Peak hours because battery ran out & EV started at 6PM.`, `Menarik ${stNo.grid.toFixed(1)} kW dari TNB waktu Puncak kerana bateri habis & EV mula cas 6 petang.`);
       } else if (stNo.waste > 0.1) {
-        $('noai-title').innerText = tr('Wasting Midday Rooftop Solar', 'Membazir Solar Bumbung Tengah Hari');$('noai-desc').innerText = tr(`${stNo.waste.toFixed(1)} kW of clean solar is wasted with zero township sharing credit.`, `${stNo.waste.toFixed(1)} kW solar terbuang tanpa kredit perkongsian perbandaran.`);
+        $('noai-title').innerText = tr('Wasting Midday Rooftop Solar', 'Membazir Solar Bumbung Tengah Hari');
+        $('noai-desc').innerText = tr(`${stNo.waste.toFixed(1)} kW of clean solar is wasted with zero township sharing credit.`, `${stNo.waste.toFixed(1)} kW solar terbuang tanpa kredit perkongsian perbandaran.`);
       } else {
-        $('noai-title').innerText = tr('Buying Unscheduled TNB Grid Power', 'Membeli Kuasa Grid TNB Tanpa Jadual');$('noai-desc').innerText = tr('Battery empty from night before; pulling TNB grid power for morning loads.', 'Bateri kosong dari malam tadi; menarik kuasa TNB untuk beban pagi.');
+        $('noai-title').innerText = tr('Buying Unscheduled TNB Grid Power', 'Membeli Kuasa Grid TNB Tanpa Jadual');
+        $('noai-desc').innerText = tr('Battery empty from night before; pulling TNB grid power for morning loads.', 'Bateri kosong dari malam tadi; menarik kuasa TNB untuk beban pagi.');
       }
 
       if (evHours(false, dt).includes(hour)) {
         $('noai-ev-pill').innerText = tr('Peak Charging!', 'Cas Waktu Puncak!');
-        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-600 text-white whitespace-nowrap';$('noai-ev-desc').innerText = tr(`Pulling ${EV_KW} kW during expensive 28.52 sen Peak!`, `Menarik ${EV_KW} kW semasa waktu Puncak 28.52 sen yang mahal!`);
+        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-600 text-white whitespace-nowrap';
+        $('noai-ev-desc').innerText = tr(`Pulling ${EV_KW} kW during expensive 28.52 sen Peak!`, `Menarik ${EV_KW} kW semasa waktu Puncak 28.52 sen yang mahal!`);
       } else {
         $('noai-ev-pill').innerText = tr('Idle', 'Rehat');
-        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-500 text-white whitespace-nowrap';$('noai-ev-desc').innerText = tr('Charges immediately at 6PM Peak when plugged in.', 'Mengecas serta-merta pada 6 petang (Puncak) apabila dipalam.');
+        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-500 text-white whitespace-nowrap';
+        $('noai-ev-desc').innerText = tr('Charges immediately at 6PM Peak when plugged in.', 'Mengecas serta-merta pada 6 petang (Puncak) apabila dipalam.');
       }
 
       const noTotalLoad = stNo.load > 0 ? stNo.load : 1;
       const noSolarShare = hour === 0 ? 0 : Math.round(stNo.sToLoad / noTotalLoad * 100);
       const noBattShare = hour === 0 ? 0 : Math.round(stNo.bToLoad / noTotalLoad * 100);
       const noGridShare = hour === 0 ? 0 : Math.max(0, 100 - noSolarShare - noBattShare);
-      $('noai-bar-solar').style.width = noSolarShare + '%'; $('noai-pct-solar').innerText = noSolarShare + '\%';$('noai-bar-batt').style.width = noBattShare + '%'; $('noai-pct-batt').innerText = noBattShare + '\%';$('noai-bar-grid').style.width = noGridShare + '%'; $('noai-pct-grid').innerText = noGridShare + '\%';$('noai-grid-badge').innerText = tr(`TNB Grid Draw: ${stNo.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${stNo.imp.toFixed(1)} kW`);
-      $('noai-val-waste').innerText = stNo.waste.toFixed(1) + ' kW';$('noai-overpay').innerText = `+${fmtRM(saved)} Extra`;
+      $('noai-bar-solar').style.width = noSolarShare + '%'; $('noai-pct-solar').innerText = noSolarShare + '%';
+      $('noai-bar-batt').style.width = noBattShare + '%'; $('noai-pct-batt').innerText = noBattShare + '%';
+      $('noai-bar-grid').style.width = noGridShare + '%'; $('noai-pct-grid').innerText = noGridShare + '%';
+      $('noai-grid-badge').innerText = tr(`TNB Grid Draw: ${stNo.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${stNo.imp.toFixed(1)} kW`);
+      $('noai-val-waste').innerText = stNo.waste.toFixed(1) + ' kW';
+      $('noai-overpay').innerText = `+${fmtRM(saved)} Extra`;
       $('noai-month-loss').innerText = `RM ${Math.round(monthly)} / month`;
 
-      $('val-saved-today').innerText = fmtRM(saved);$('val-month').innerText = tr(`RM ${Math.round(monthly)} / month`, `RM ${Math.round(monthly)} / bulan`);
-      $('val-co2').innerText = co2.toFixed(1) + ' kg CO₂';$('val-ecopts').innerText = `🌱 +${Math.round(co2 * 3)} EcoPts`;
-      $('cmp-noai-cost').innerText = fmtRM(costNo);$('cmp-ai-cost').innerText = fmtRM(costAI);
+      $('val-saved-today').innerText = fmtRM(saved);
+      $('val-month').innerText = tr(`RM ${Math.round(monthly)} / month`, `RM ${Math.round(monthly)} / bulan`);
+      $('val-co2').innerText = co2.toFixed(1) + ' kg CO₂';
+      $('val-ecopts').innerText = `🌱 +${Math.round(co2 * 3)} EcoPts`;
 
       if (forecastChartInstance && !$('tab-forecast').classList.contains('hidden')) renderForecastChart();
     }
@@ -1004,6 +1053,7 @@
         renderPlayBtn(false);
         return;
       }
+      setBatteryMode('auto');
       setDualScreen(true);
       switchTab('home');
       const sl = $('time-slider');
@@ -1016,17 +1066,6 @@
         updateSimulation();
       }, 2200);
     }
-    
-      // Show both phones side-by-side and switch Phone 1 to Home tab so judges can watch both live!
-      setDualScreen(true);
-      switchTab('home');
-      renderPlayBtn(true);
-      playTimer = setInterval(() => {
-        const sl = $('time-slider');
-        sl.value = (parseInt(sl.value) + 1) % 24;
-        updateSimulation();
-      }, 2500);
-    }
 
     const nowPlugin = { id: 'nowLine', afterDatasetsDraw(c) {
       const x = c.scales.x.getPixelForValue(parseInt($('time-slider').value)), a = c.chartArea, g = c.ctx;
@@ -1035,7 +1074,7 @@
       g.setLineDash([]); g.fillStyle = '#E31837'; g.font = 'bold 10px Inter'; g.textAlign = 'center'; g.fillText(tr('NOW', 'KINI'), x, a.top + 10); g.restore();
     } };
     function renderForecastChart() {
-      const day = simulateDay(true);
+      const day = simulateDay(true, parseInt($('time-slider').value));
       const labels = day.map(x => lang === 'ms' ? String(x.h).padStart(2, '0') + ':00' : x.h === 0 ? '12AM' : x.h < 12 ? x.h + 'AM' : x.h === 12 ? '12PM' : (x.h - 12) + 'PM');
       const sets = [day.map(x => x.solar), day.map(x => +x.load.toFixed(1)), day.map(x => Math.round(x.soc * 100))];
       if (forecastChartInstance) {
@@ -1075,6 +1114,7 @@
       });
       renderPlayBtn(!!playTimer);
       setDualScreen(dualMode);
+      setBatteryMode(batteryMode);
       if (forecastChartInstance) { forecastChartInstance.destroy(); forecastChartInstance = null; }
       updateSimulation();
       updateRewards();
