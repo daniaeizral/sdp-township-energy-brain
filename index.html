@@ -68,448 +68,290 @@
     <div id="phone-ai" class="phone-frame flex flex-col justify-between">
       <div class="phone-notch"></div>
 
-      <!-- Top Status Bar -->
-      <div class="bg-white pt-3 pb-2 px-6 flex justify-between items-center text-xs font-semibold text-slate-600 border-b border-slate-100 z-40">
+      <!-- Status bar -->
+      <div class="bg-white pt-3 pb-1 px-6 flex justify-between items-center text-xs font-semibold text-slate-600 z-40">
         <span id="status-time">14:00</span>
-        <span class="text-[10px] font-extrabold tracking-wider uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">✅ SDP AI Brain</span>
         <div class="flex items-center gap-1.5">
           <i class="fa-solid fa-wifi"></i>
           <i id="status-batt-icon" class="fa-solid fa-battery-full text-emerald-600"></i>
         </div>
       </div>
 
-      <!-- App Header -->
-      <div class="bg-white px-4 py-2.5 shadow-sm z-30">
-        <div class="flex justify-between items-center">
-          <div>
-            <h1 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
-              <span class="w-2.5 h-2.5 rounded-full sdp-red inline-block"></span>
-              Township Energy Brain
-            </h1>
-            <p class="text-[10px] text-slate-500" id="header-subtitle">City of Elmina • Lot 42 Twin-Villa</p>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <div id="lang-toggle" role="group" aria-label="Language" class="flex bg-slate-100 rounded-full p-0.5 text-[10px] font-bold">
-              <button id="lang-en" onclick="setLang('en')" aria-pressed="true" class="px-2 py-0.5 rounded-full transition-colors sdp-red text-white">EN</button>
-              <button id="lang-ms" onclick="setLang('ms')" aria-pressed="false" class="px-2 py-0.5 rounded-full transition-colors text-slate-500">BM</button>
-            </div>
-            <button onclick="toggleMobileSimDrawer()" class="md:hidden bg-slate-900 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow">
-              <i class="fa-solid fa-sliders"></i> Sim
-            </button>
-          </div>
+      <!-- Header -->
+      <div class="bg-white px-4 pb-2.5 pt-1 flex justify-between items-center z-30">
+        <div>
+          <h1 class="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full sdp-red inline-block"></span> Township Energy Brain
+          </h1>
+          <p class="text-[10px] text-slate-500" id="header-subtitle">City of Elmina • Lot 42 Twin-Villa</p>
         </div>
-
-        <!-- PROMINENT LIVE BILL COUNTER BAR (MONOTONIC — NEVER GOES BACKWARDS) -->
-        <div class="mt-2 bg-emerald-950 text-white px-3.5 py-2 rounded-xl flex items-center justify-between border border-emerald-700 shadow-inner">
-          <div>
-            <span class="text-[9px] uppercase tracking-wider text-emerald-300 font-bold block">⚡ TNB Electricity Bill Today</span>
-            <div class="flex items-baseline gap-2">
-              <span id="ai-live-bill" class="text-xl font-extrabold text-emerald-400">RM 1.47</span>
-              <span id="ai-hour-delta" class="text-[10px] font-bold bg-emerald-800/90 text-emerald-200 px-1.5 py-0.5 rounded">+RM 0.00/hr</span>
-            </div>
+        <div class="flex items-center gap-1.5">
+          <div id="lang-toggle" role="group" aria-label="Language" class="flex bg-slate-100 rounded-full p-0.5 text-[10px] font-bold">
+            <button id="lang-en" onclick="setLang('en')" aria-pressed="true" class="px-2 py-0.5 rounded-full transition-colors sdp-red text-white">EN</button>
+            <button id="lang-ms" onclick="setLang('ms')" aria-pressed="false" class="px-2 py-0.5 rounded-full transition-colors text-slate-500">BM</button>
           </div>
-          <div class="text-right">
-            <span id="ai-tariff-pill" class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-red-600 text-white uppercase">Peak 28.52s</span>
-            <p id="ai-saved-badge" class="text-[10px] text-emerald-300 font-bold mt-0.5">Saved RM 0.29</p>
-          </div>
+          <button onclick="toggleMobileSimDrawer()" class="md:hidden bg-slate-900 text-white text-[11px] px-2.5 py-1 rounded-full font-semibold flex items-center gap-1 shadow">
+            <i class="fa-solid fa-sliders"></i> Sim
+          </button>
         </div>
       </div>
 
-      <!-- ================= SCROLLABLE MAIN CONTENT AREA ================= -->
-      <div class="flex-1 overflow-y-auto no-scrollbar px-4 py-2.5 space-y-2.5 bg-slate-50">
+      <!-- Scrollable content -->
+      <div class="flex-1 overflow-y-auto no-scrollbar px-4 py-3 space-y-3 bg-slate-50">
 
-        <!-- TAB 1: HOME SCREEN -->
-        <div id="tab-home" class="space-y-2.5">
-          <!-- AI Action Brain Banner -->
-          <div id="ai-banner" class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3 rounded-2xl shadow-md transition-all duration-300">
-            <div class="flex items-center justify-between mb-0.5">
-              <span id="ai-mode-badge" class="text-[10px] uppercase tracking-wider font-bold bg-white/20 px-2 py-0.5 rounded-full">
-                <i class="fa-solid fa-microchip mr-1"></i> AI Brain Active
-              </span>
+        <!-- TAB 1: HOME -->
+        <div id="tab-home" class="space-y-3">
+
+          <!-- Hero: bill + what the AI is doing -->
+          <div id="ai-banner" class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 rounded-3xl shadow-md transition-all duration-300">
+            <div class="flex items-center justify-between">
+              <span id="ai-mode-badge" class="text-[10px] uppercase tracking-wider font-bold bg-white/20 px-2 py-0.5 rounded-full"><i class="fa-solid fa-microchip mr-1"></i> AI Brain Active</span>
               <span id="weather-pill" class="text-xs font-semibold">☀️ Sunny</span>
             </div>
-            <p id="ai-decision-title" class="text-xs font-bold leading-snug mt-1">Avoiding Expensive TNB Peak Tariff</p>
-            <p id="ai-decision-desc" class="text-[11px] text-emerald-50 mt-0.5 leading-relaxed">
-              Running home 100% on Solar + Battery. Sending surplus to Elmina Community Grid.
-            </p>
-            <!-- Combined AI Brain: appliance and EV recommendations -->
-            <div class="mt-2.5 pt-2.5 border-t border-white/25" aria-live="polite">
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <span id="appliance-heading" class="text-[10px] font-extrabold"><i class="fa-solid fa-lightbulb mr-1"></i>Smart Appliance Advice</span>
-                <span id="appliance-status" class="text-[9px] font-bold rounded-full px-2 py-0.5 bg-white/20 text-white">Checking</span>
-              </div>
-              <p id="appliance-tip" class="text-[11px] font-semibold leading-snug">Finding your best time...</p>
-              <div class="grid grid-cols-3 gap-1.5 mt-2">
-                <div class="rounded-lg bg-white/15 px-2 py-1.5 min-w-0">
-                  <p id="washer-label" class="text-[9px] font-semibold text-white/80">🧺 Washer</p>
-                  <p id="washer-time" class="text-[10px] font-extrabold leading-snug">—</p>
-                </div>
-                <div class="rounded-lg bg-white/15 px-2 py-1.5 min-w-0">
-                  <p id="dish-label" class="text-[9px] font-semibold text-white/80">🍽️ Dishwasher</p>
-                  <p id="dish-time" class="text-[10px] font-extrabold leading-snug">—</p>
-                </div>
-                <div class="rounded-lg bg-white/15 px-2 py-1.5 min-w-0">
-                  <p id="ev-label" class="text-[9px] font-semibold text-white/80">🚗 EV Charger</p>
-                  <p id="ev-best-time" class="text-[10px] font-extrabold leading-snug">10 PM</p>
-                </div>
-              </div>
-              <div class="flex items-center justify-between gap-2 mt-2">
-                <p id="appliance-reason" class="text-[9px] text-white/85 leading-snug flex-1"></p>
-                <span id="ev-pill" class="shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">EV Idle</span>
-              </div>
-              <p id="ev-desc" class="text-[9px] text-white/80 mt-1 leading-snug"></p>
-              <p id="appliance-disclaimer" class="text-[8px] text-white/60 mt-1">Simulation only • No remote control</p>
+            <div class="flex items-center justify-between mt-3">
+              <p class="text-[10px] uppercase tracking-wide text-white/70 font-semibold">TNB Bill Today</p>
+              <span id="ai-tariff-pill" class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-red-600 text-white uppercase whitespace-nowrap">Peak 28.52s</span>
+            </div>
+            <span id="ai-live-bill" class="block text-3xl font-extrabold leading-none mt-1 whitespace-nowrap">RM 1.47</span>
+            <div class="flex items-center gap-2 mt-2 text-[11px] font-bold">
+              <span id="ai-saved-badge" class="text-emerald-100 whitespace-nowrap">Saved RM 0.29</span>
+              <span class="text-white/40">•</span>
+              <span id="ai-hour-delta" class="text-white/80 whitespace-nowrap">+RM 0.00/hr</span>
+            </div>
+            <div class="mt-3 pt-3 border-t border-white/25">
+              <p id="ai-decision-title" class="text-xs font-bold leading-snug">Avoiding Expensive TNB Peak Tariff</p>
+              <p id="ai-decision-desc" class="text-[11px] text-emerald-50 mt-0.5 leading-snug">Running home 100% on Solar + Battery.</p>
             </div>
           </div>
 
-          <!-- Telemetry Cards (Solar, Home Load) -->
-          <div class="grid grid-cols-2 gap-2">
-            <div class="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm text-center">
-              <div class="text-amber-500 text-base"><i class="fa-solid fa-sun"></i></div>
-              <p class="text-[10px] text-slate-400 font-semibold uppercase">Solar Made</p>
+          <!-- Appliance advice (prominent, right under the hero) -->
+          <div class="bg-white p-4 rounded-3xl shadow-md border-l-4 border-emerald-500" aria-live="polite">
+            <div class="flex items-center justify-between gap-2">
+              <span id="appliance-heading" class="text-sm font-extrabold text-slate-800">Best time to run appliances</span>
+              <span id="appliance-status" class="text-[10px] font-bold rounded-full px-2 py-0.5 bg-slate-100 text-slate-600 whitespace-nowrap">Checking</span>
+            </div>
+            <p id="appliance-tip" class="text-xs font-semibold text-slate-700 mt-2 leading-snug">Finding your best time...</p>
+            <div class="grid grid-cols-3 gap-2 mt-3">
+              <div class="rounded-2xl bg-emerald-50 px-2 py-2.5 text-center"><p id="washer-label" class="text-[10px] font-semibold text-slate-500">🧺 Washer</p><p id="washer-time" class="text-xs font-extrabold text-emerald-800 mt-0.5">—</p></div>
+              <div class="rounded-2xl bg-emerald-50 px-2 py-2.5 text-center"><p id="dish-label" class="text-[10px] font-semibold text-slate-500">🍽️ Dishwasher</p><p id="dish-time" class="text-xs font-extrabold text-emerald-800 mt-0.5">—</p></div>
+              <div class="rounded-2xl bg-emerald-50 px-2 py-2.5 text-center"><p id="ev-label" class="text-[10px] font-semibold text-slate-500">🚗 EV</p><p id="ev-best-time" class="text-xs font-extrabold text-emerald-800 mt-0.5">10 PM+</p></div>
+            </div>
+          </div>
+
+          <!-- Three key numbers -->
+          <div class="grid grid-cols-3 gap-2">
+            <div class="bg-white p-2.5 rounded-2xl shadow-sm text-center">
+              <i class="fa-solid fa-sun text-amber-500"></i>
+              <p class="text-[9px] text-slate-400 font-semibold uppercase mt-1">Solar</p>
               <p id="val-solar" class="text-sm font-extrabold text-slate-800">4.8 kW</p>
             </div>
-            <div class="bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm text-center">
-              <div class="text-blue-500 text-base"><i class="fa-solid fa-house-signal"></i></div>
-              <p class="text-[10px] text-slate-400 font-semibold uppercase">Home Usage</p>
+            <div class="bg-white p-2.5 rounded-2xl shadow-sm text-center">
+              <i class="fa-solid fa-house text-blue-500"></i>
+              <p class="text-[9px] text-slate-400 font-semibold uppercase mt-1">Home</p>
               <p id="val-load" class="text-sm font-extrabold text-slate-800">2.8 kW</p>
             </div>
-          </div>
-
-          <!-- Battery Status Card + Manual Override Mode Control -->
-          <div id="batt-card" class="bg-white p-3 rounded-2xl border-2 border-emerald-300 shadow-sm transition-colors duration-300">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div id="batt-icon-wrap" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-emerald-100 text-emerald-600">
-                  <i id="batt-icon" class="fa-solid fa-battery-full"></i>
-                </div>
-                <div>
-                  <p class="text-[10px] text-slate-400 font-semibold uppercase">Home Battery (16 kWh)</p>
-                  <p id="val-battery" class="text-xl font-extrabold text-slate-800 leading-none mt-0.5">96%</p>
-                </div>
-              </div>
-              <div class="text-right">
-                <span id="batt-status-pill" class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-600 text-white">
-                  <i class="fa-solid fa-bolt"></i> Charging
-                </span>
-                <p id="batt-status-rate" class="text-[10px] font-bold text-emerald-700 mt-0.5">+2.0 kW in</p>
-              </div>
-            </div>
-            <div class="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden">
-              <div id="batt-level-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 96%"></div>
-            </div>
-            <p id="batt-status-desc" class="text-[10px] text-slate-500 mt-1.5 leading-snug">Storing surplus solar for evening peak.</p>
-
-            <!-- Interactive Battery Mode Control (AI Auto / Force Use / Hold) -->
-            <div class="mt-2.5 pt-2 border-t border-slate-100">
-              <div class="flex items-center justify-between mb-1">
-                <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-400">Battery Control Mode</span>
-                <span id="batt-mode-hint" class="text-[9px] font-bold text-emerald-600">Smart Tariff Optimization</span>
-              </div>
-              <div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-[10px] font-extrabold">
-                <button id="bmode-auto" onclick="setBatteryMode('auto')" class="py-1.5 rounded-lg bg-emerald-600 text-white shadow-sm transition-all">
-                  🤖 AI Auto
-                </button>
-                <button id="bmode-use" onclick="setBatteryMode('use')" class="py-1.5 rounded-lg text-slate-600 hover:bg-white/60 transition-all">
-                  ⚡ Force Use
-                </button>
-                <button id="bmode-hold" onclick="setBatteryMode('hold')" class="py-1.5 rounded-lg text-slate-600 hover:bg-white/60 transition-all">
-                  ⏸️ Hold
-                </button>
-              </div>
+            <div class="bg-white p-2.5 rounded-2xl shadow-sm text-center">
+              <i id="batt-icon" class="fa-solid fa-battery-full text-emerald-600"></i>
+              <p class="text-[9px] text-slate-400 font-semibold uppercase mt-1">Battery</p>
+              <p id="val-battery" class="text-sm font-extrabold text-slate-800">96%</p>
+              <div class="w-full bg-slate-100 h-1 rounded-full mt-1 overflow-hidden"><div id="batt-level-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 96%"></div></div>
+              <span id="batt-status-pill" class="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-emerald-600 text-white mt-1"><i class="fa-solid fa-bolt"></i> Charging</span>
             </div>
           </div>
 
-          <!-- Active Power Source Flow Card -->
-          <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
-            <div class="flex justify-between items-center mb-1.5">
-              <span class="text-[11px] font-bold text-slate-700">Current Power Routing</span>
-              <span id="grid-draw-badge" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">TNB Grid Draw: 0.0 kW</span>
-            </div>
+          <!-- Power sources -->
+          <div class="bg-white p-3 rounded-2xl shadow-sm">
+            <p class="text-[11px] font-bold text-slate-700 mb-1.5">Where your power comes from</p>
             <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex">
               <div id="bar-solar" class="bg-amber-400 h-full transition-all duration-500" style="width: 100%"></div>
               <div id="bar-batt" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
               <div id="bar-grid" class="bg-red-500 h-full transition-all duration-500" style="width: 0%"></div>
             </div>
-            <div class="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
-              <span>☀️ Solar: <b id="pct-solar">100%</b></span>
-              <span>🔋 Battery: <b id="pct-batt">0%</b></span>
-              <span>⚡ TNB Grid: <b id="pct-grid">0%</b></span>
+            <div class="flex justify-between text-[10px] text-slate-500 font-semibold mt-1.5">
+              <span>☀️ Solar <b id="pct-solar">100%</b></span>
+              <span>🔋 Battery <b id="pct-batt">0%</b></span>
+              <span>⚡ TNB <b id="pct-grid">0%</b></span>
             </div>
-            <p class="text-[10px] text-emerald-700 font-semibold mt-1.5 bg-emerald-50 rounded-lg px-2 py-1">🏘️ Shared to Elmina grid: <b id="val-export">0.0 kW</b></p>
+            <p class="text-[10px] text-slate-400 mt-1.5">🏘️ Shared to township: <b id="val-export" class="text-emerald-700">0.0 kW</b></p>
           </div>
 
-          <!-- Daily Savings Snapshot -->
-          <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+          <!-- Savings -->
+          <div class="bg-white p-3 rounded-2xl shadow-sm flex items-center justify-between">
             <div>
-              <p class="text-[10px] text-slate-400 font-semibold">Total Saved Today (Bill + Export Credit)</p>
+              <p class="text-[10px] text-slate-400 font-semibold">Total saved today</p>
               <p id="val-saved-today" class="text-lg font-extrabold text-emerald-600">RM 8.85</p>
-              <p class="text-[10px] text-slate-500">Projected: <b id="val-month">RM 265 / month</b></p>
             </div>
             <div class="text-right">
-              <p class="text-[10px] text-slate-400 font-semibold">Carbon Avoided</p>
-              <p id="val-co2" class="text-sm font-extrabold text-slate-700">14.2 kg CO₂</p>
-              <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full" id="val-ecopts">🌱 +45 EcoPts</span>
+              <p class="text-[10px] text-slate-400 font-semibold">Projected</p>
+              <p id="val-month" class="text-sm font-extrabold text-slate-700">RM 265 / month</p>
             </div>
           </div>
         </div>
 
-        <!-- TAB 2: AI FORECAST & SCHEDULE -->
+        <!-- TAB 2: PLAN -->
         <div id="tab-forecast" class="space-y-3 hidden">
-          <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
-            <h2 class="text-xs font-bold text-slate-800 mb-1">24-Hour Solar vs. Home Demand Forecast</h2>
-            <p class="text-[11px] text-slate-500 mb-2">AI predicts sunlight & schedules battery before TNB 2PM Peak.</p>
+          <div class="bg-white p-3.5 rounded-2xl shadow-sm">
+            <h2 class="text-xs font-bold text-slate-800">Today's forecast</h2>
+            <p class="text-[11px] text-slate-500 mb-2">Solar, home demand and battery level over 24 hours.</p>
             <canvas id="forecastChart" height="170"></canvas>
           </div>
 
-          <div class="bg-white p-3.5 rounded-2xl border border-emerald-200 shadow-sm">
-            <h3 id="appliance-schedule-heading" class="text-xs font-bold text-slate-800 mb-2">🧠 Suggested Appliance Schedule</h3>
-            <div id="appliance-schedule-list" class="space-y-2 text-[11px] text-slate-600"></div>
+          <div class="bg-white p-3.5 rounded-2xl shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold text-slate-800">Battery mode</span>
+              <span id="batt-mode-hint" class="text-[10px] font-bold text-emerald-600">Smart Tariff Optimization</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl text-[10px] font-extrabold">
+              <button id="bmode-auto" onclick="setBatteryMode('auto')" class="py-1.5 rounded-lg bg-emerald-600 text-white shadow-sm transition-all">🤖 AI Auto</button>
+              <button id="bmode-use" onclick="setBatteryMode('use')" class="py-1.5 rounded-lg text-slate-600 transition-all">⚡ Force Use</button>
+              <button id="bmode-hold" onclick="setBatteryMode('hold')" class="py-1.5 rounded-lg text-slate-600 transition-all">⏸️ Hold</button>
+            </div>
           </div>
 
-          <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm space-y-2.5">
-            <h3 class="text-xs font-bold text-slate-800">Automated AI Schedule Today</h3>
-            <div class="flex items-start gap-2.5 text-xs">
-              <span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded text-[11px] mt-0.5">08:00</span>
-              <div>
-                <p class="font-bold text-slate-700">Charge Battery to 100% Before 2PM</p>
-                <p class="text-[11px] text-slate-500">Stores free morning solar (or cheap off-peak backup on stormy days).</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-2.5 text-xs">
-              <span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[11px] mt-0.5">14:00</span>
-              <div>
-                <p class="font-bold text-slate-700">Block Expensive TNB Peak Grid (RM 0/hr)</p>
-                <p class="text-[11px] text-slate-500">TNB hits 28.52 sen/kWh. AI powers home 100% on Solar + Battery.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-2.5 text-xs">
-              <span class="bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded text-[11px] mt-0.5">18:00</span>
-              <div>
-                <p class="font-bold text-slate-700">Evening Peak Battery Discharge (6PM–10PM)</p>
-                <p class="text-[11px] text-slate-500">Sun sets at 6PM while TNB is still Peak. Reserved battery runs AC at RM 0/hr.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-2.5 text-xs">
-              <span class="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded text-[11px] mt-0.5">22:00</span>
-              <div>
-                <p class="font-bold text-slate-700">Switch to Cheap Night TNB + EV Charge</p>
-                <p class="text-[11px] text-slate-500">Rate drops to 24.43 sen/kWh. Starts EV charger & stops draining battery.</p>
-              </div>
-            </div>
+          <div class="bg-white p-3.5 rounded-2xl shadow-sm space-y-2.5">
+            <h3 class="text-xs font-bold text-slate-800">Today's AI plan</h3>
+            <div class="flex items-center gap-2.5 text-xs"><span class="bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded text-[11px] w-14 text-center">08:00</span><p class="text-slate-700 font-semibold">Fill battery with free solar</p></div>
+            <div class="flex items-center gap-2.5 text-xs"><span class="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[11px] w-14 text-center">14:00</span><p class="text-slate-700 font-semibold">Peak starts — avoid TNB grid</p></div>
+            <div class="flex items-center gap-2.5 text-xs"><span class="bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded text-[11px] w-14 text-center">18:00</span><p class="text-slate-700 font-semibold">Battery powers the evening</p></div>
+            <div class="flex items-center gap-2.5 text-xs"><span class="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded text-[11px] w-14 text-center">22:00</span><p class="text-slate-700 font-semibold">Cheap rate — charge EV</p></div>
+            <p class="text-[9px] text-slate-400">Simulation only • No remote appliance control</p>
           </div>
         </div>
 
-        <!-- TAB 3: COMMUNITY SHARING & GREEN REWARDS -->
+        <!-- TAB 3: TOWNSHIP -->
         <div id="tab-community" class="space-y-3 hidden">
-          <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm">
+          <div class="bg-white p-3.5 rounded-2xl shadow-sm">
             <div class="flex justify-between items-center">
               <div>
-                <h3 class="text-xs font-bold text-slate-800">Auto-Share Surplus to Township</h3>
-                <p class="text-[11px] text-slate-500">Send extra rooftop solar to Elmina parks & streetlights</p>
+                <h3 class="text-xs font-bold text-slate-800">Share surplus with township</h3>
+                <p class="text-[11px] text-slate-500">Extra solar powers Elmina parks & streetlights</p>
               </div>
               <input id="share-toggle" type="checkbox" checked class="w-5 h-5 accent-emerald-600 rounded cursor-pointer" onchange="toggleSharing(this.checked)" />
             </div>
             <div class="mt-3 p-2.5 bg-emerald-50 rounded-xl flex justify-between items-center text-xs">
-              <span class="font-semibold text-emerald-800">Your Export Credit Today:</span>
-              <span id="val-credit-today" class="font-extrabold text-emerald-600">+RM 1.90 Rebate</span>
+              <span class="font-semibold text-emerald-800">Export credit today</span>
+              <span id="val-credit-today" class="font-extrabold text-emerald-600">+RM 1.90</span>
             </div>
           </div>
 
-          <div class="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-sm space-y-2.5">
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-white p-3 rounded-2xl shadow-sm text-center"><p class="text-[10px] text-slate-400 font-semibold">Carbon avoided</p><p id="val-co2" class="text-sm font-extrabold text-slate-800">14.2 kg CO₂</p></div>
+            <div class="bg-white p-3 rounded-2xl shadow-sm text-center"><p class="text-[10px] text-slate-400 font-semibold">Earned today</p><p id="val-ecopts" class="text-sm font-extrabold text-emerald-700">🌱 +45 EcoPts</p></div>
+          </div>
+
+          <div class="bg-white p-3.5 rounded-2xl shadow-sm space-y-2.5">
             <div class="flex justify-between items-center">
-              <h3 class="text-xs font-bold text-slate-800">Your SDP Green Rewards</h3>
+              <h3 class="text-xs font-bold text-slate-800">Green Rewards</h3>
               <span class="bg-amber-100 text-amber-800 text-xs font-extrabold px-2.5 py-0.5 rounded-full" id="eco-balance">1,240 EcoPts</span>
             </div>
             <div class="p-2.5 border border-slate-100 rounded-xl flex justify-between items-center">
-              <div>
-                <p class="text-xs font-bold text-slate-700">RM 20 Maintenance Fee Rebate</p>
-                <p class="text-[11px] text-slate-400">Sime Darby Property Township Bill</p>
-              </div>
-              <button id="redeem-1" onclick="redeem(1,1000)" class="sdp-red text-white text-[11px] font-bold px-3 py-1.5 rounded-lg">Redeem · 1,000 pts</button>
+              <div><p class="text-xs font-bold text-slate-700">RM 20 Maintenance Rebate</p><p class="text-[11px] text-slate-400">Township bill</p></div>
+              <button id="redeem-1" onclick="redeem(1,1000)" class="sdp-red text-white text-[11px] font-bold px-3 py-1.5 rounded-lg">1,000 pts</button>
             </div>
             <div class="p-2.5 border border-slate-100 rounded-xl flex justify-between items-center">
-              <div>
-                <p class="text-xs font-bold text-slate-700">Free Parking @ Elmina Lakeside Mall</p>
-                <p class="text-[11px] text-slate-400">3 Hours Green VIP Bay</p>
-              </div>
-              <button id="redeem-2" onclick="redeem(2,500)" class="bg-slate-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg">Redeem · 500 pts</button>
+              <div><p class="text-xs font-bold text-slate-700">Free Parking, Elmina Mall</p><p class="text-[11px] text-slate-400">3 hours</p></div>
+              <button id="redeem-2" onclick="redeem(2,500)" class="bg-slate-800 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg">500 pts</button>
             </div>
           </div>
         </div>
-
       </div>
 
-      <!-- Bottom Navigation Bar (Clean 3-Tab Layout) -->
+      <!-- Bottom navigation -->
       <div class="bg-white border-t border-slate-200 px-3 py-2 flex justify-around items-center text-[11px] font-semibold text-slate-400 z-40">
-        <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center gap-1 sdp-red-text font-bold">
-          <i class="fa-solid fa-bolt text-base"></i>
-          <span>Live Home</span>
-        </button>
-        <button onclick="switchTab('forecast')" id="nav-forecast" class="flex flex-col items-center gap-1">
-          <i class="fa-solid fa-chart-line text-base"></i>
-          <span>AI Schedule</span>
-        </button>
-        <button onclick="switchTab('community')" id="nav-community" class="flex flex-col items-center gap-1">
-          <i class="fa-solid fa-seedling text-base"></i>
-          <span>Township</span>
-        </button>
+        <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center gap-1 sdp-red-text font-bold"><i class="fa-solid fa-house text-base"></i><span>Home</span></button>
+        <button onclick="switchTab('forecast')" id="nav-forecast" class="flex flex-col items-center gap-1"><i class="fa-solid fa-chart-line text-base"></i><span>Plan</span></button>
+        <button onclick="switchTab('community')" id="nav-community" class="flex flex-col items-center gap-1"><i class="fa-solid fa-seedling text-base"></i><span>Township</span></button>
       </div>
     </div>
 
-    <!-- ================= PHONE 2: WITHOUT AI (STANDARD SOLAR INVERTER APP) ================= -->
+    <!-- ================= PHONE 2: STANDARD INVERTER APP (NO AI) ================= -->
     <div id="phone-noai" class="phone-frame flex flex-col justify-between hidden">
       <div class="phone-notch"></div>
 
-      <!-- Top Status Bar -->
-      <div class="bg-slate-900 pt-3 pb-2 px-6 flex justify-between items-center text-xs font-semibold text-slate-300 border-b border-slate-800 z-40">
+      <!-- Status bar -->
+      <div class="bg-slate-200 pt-3 pb-1.5 px-6 flex justify-between items-center text-xs font-semibold text-slate-600 z-40">
         <span id="noai-status-time">14:00</span>
-        <span class="text-[10px] font-extrabold tracking-wider uppercase text-red-400 bg-red-950/80 border border-red-800 px-2 py-0.5 rounded-full">❌ Standard App (No AI)</span>
         <div class="flex items-center gap-1.5">
           <i class="fa-solid fa-wifi"></i>
-          <i id="noai-top-batt" class="fa-solid fa-battery-quarter text-red-400"></i>
+          <i id="noai-top-batt" class="fa-solid fa-battery-quarter text-slate-500"></i>
         </div>
       </div>
 
-      <!-- App Header (FusionSolar / Basic Inverter Style) -->
-      <div class="bg-slate-800 text-white px-4 py-2.5 shadow-sm z-30">
-        <div class="flex justify-between items-center">
-          <div>
-            <h2 class="text-sm font-extrabold flex items-center gap-1.5 text-slate-100">
-              <i class="fa-solid fa-solar-panel text-sky-400"></i>
-              BasicSolar Monitor
-            </h2>
-            <p class="text-[10px] text-slate-400">Conventional Inverter • Tariff-Blind Mode</p>
-          </div>
-          <span class="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-semibold">Dumb Battery</span>
+      <!-- Title bar -->
+      <div class="bg-slate-700 text-white px-4 py-2.5 flex justify-between items-center z-30">
+        <div>
+          <h2 class="text-sm font-bold">Solar Monitor</h2>
+          <p class="text-[10px] text-slate-300">Basic inverter app</p>
         </div>
+        <span class="text-[10px] font-bold border border-slate-400 text-slate-200 px-2 py-0.5 rounded">NO AI</span>
+      </div>
 
-        <!-- PROMINENT LIVE BILL COUNTER BAR (WITHOUT AI) -->
-        <div class="mt-2 bg-red-950 text-white px-3.5 py-2 rounded-xl flex items-center justify-between border border-red-700 shadow-inner">
-          <div>
-            <span class="text-[9px] uppercase tracking-wider text-red-300 font-bold block">💸 TNB Electricity Bill Today</span>
+      <!-- Page -->
+      <div class="flex-1 overflow-y-auto no-scrollbar bg-white">
+
+        <!-- Bill -->
+        <div class="px-4 py-3 border-b border-slate-200">
+          <p class="text-[10px] text-slate-500 font-semibold uppercase">TNB Bill Today</p>
+          <div class="flex items-end justify-between mt-0.5">
             <div class="flex items-baseline gap-2">
-              <span id="noai-live-bill" class="text-xl font-extrabold text-red-400">RM 1.76</span>
-              <span id="noai-hour-delta" class="text-[10px] font-bold bg-red-900 text-red-200 px-1.5 py-0.5 rounded">+RM 0.00/hr</span>
+              <span id="noai-live-bill" class="text-3xl font-bold text-slate-800 leading-none">RM 1.76</span>
+              <span id="noai-hour-delta" class="text-[10px] font-semibold text-slate-500">+RM 0.00/hr</span>
             </div>
+            <span id="noai-tariff-pill" class="text-[10px] font-bold px-2 py-0.5 rounded bg-red-600 text-white uppercase">Peak 28.52s</span>
           </div>
-          <div class="text-right">
-            <span id="noai-tariff-pill" class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-red-600 text-white uppercase">Peak 28.52s</span>
-            <p id="noai-extra-badge" class="text-[10px] text-red-300 font-bold mt-0.5">+RM 0.29 higher</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Scrollable Content for Phone 2 -->
-      <div class="flex-1 overflow-y-auto no-scrollbar px-4 py-2.5 space-y-2.5 bg-slate-100">
-
-        <!-- Status Alert Box (Why it's losing money right now) -->
-        <div id="noai-banner" class="bg-gradient-to-r from-red-600 to-rose-700 text-white p-3 rounded-2xl shadow-md">
-          <div class="flex items-center justify-between mb-0.5">
-            <span class="text-[10px] uppercase tracking-wider font-bold bg-black/25 px-2 py-0.5 rounded-full">
-              <i class="fa-solid fa-triangle-exclamation mr-1"></i> No Tariff Intelligence
-            </span>
-            <span id="noai-weather-pill" class="text-xs font-semibold">☀️ Sunny</span>
-          </div>
-          <p id="noai-title" class="text-xs font-bold leading-snug mt-1">Buying Expensive TNB Peak Power</p>
-          <p id="noai-desc" class="text-[11px] text-red-100 mt-0.5 leading-relaxed">
-            Inverter does not know TNB tariff schedule. Battery drains early; pulls expensive grid power.
-          </p>
+          <p id="noai-extra-badge" class="text-xs text-red-600 font-bold mt-1">+RM 0.29 higher</p>
         </div>
 
-        <!-- Telemetry Cards (Same Solar & Home Load) -->
-        <div class="grid grid-cols-2 gap-2">
-          <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm text-center">
-            <div class="text-amber-500 text-base"><i class="fa-solid fa-sun"></i></div>
-            <p class="text-[10px] text-slate-400 font-semibold uppercase">Solar Made</p>
-            <p id="noai-val-solar" class="text-sm font-extrabold text-slate-800">4.8 kW</p>
-          </div>
-          <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-sm text-center">
-            <div class="text-blue-500 text-base"><i class="fa-solid fa-house-signal"></i></div>
-            <p class="text-[10px] text-slate-400 font-semibold uppercase">Home Usage</p>
-            <p id="noai-val-load" class="text-sm font-extrabold text-slate-800">2.8 kW</p>
-          </div>
+        <!-- What's happening -->
+        <div class="px-4 py-2.5 bg-amber-50 border-b border-amber-200">
+          <p id="noai-h-now" class="text-[10px] font-bold uppercase text-amber-700">What's happening</p>
+          <p id="noai-title" class="text-xs font-bold text-slate-800 mt-0.5 leading-snug">Using grid power without a plan</p>
+          <p id="noai-desc" class="text-[11px] text-slate-600 mt-0.5 leading-snug">This app doesn't know TNB's peak hours or the weather.</p>
         </div>
 
-        <!-- Dumb Battery Card -->
-        <div id="noai-batt-card" class="bg-white p-3 rounded-2xl border-2 border-red-300 shadow-sm">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl bg-red-100 text-red-600">
-                <i id="noai-batt-icon" class="fa-solid fa-battery-quarter"></i>
-              </div>
-              <div>
-                <p class="text-[10px] text-slate-400 font-semibold uppercase">Dumb Battery (16 kWh)</p>
-                <p id="noai-val-battery" class="text-xl font-extrabold text-slate-800 leading-none mt-0.5">10%</p>
-              </div>
-            </div>
-            <div class="text-right">
-              <span id="noai-batt-pill" class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full bg-red-600 text-white">
-                Drained
-              </span>
-              <p id="noai-batt-rate" class="text-[10px] font-bold text-red-700 mt-0.5">0.0 kW</p>
-            </div>
+        <!-- Live readings -->
+        <div class="px-4 py-1.5 bg-slate-100 text-[10px] font-bold uppercase text-slate-500 flex justify-between"><span id="noai-h-read">Live readings</span><span id="noai-h-val">Value</span></div>
+        <div class="px-4 py-2 border-b border-slate-100 flex justify-between text-xs"><span id="noai-r-weather" class="text-slate-600">Weather</span><b id="noai-weather-pill" class="text-slate-800">☀️ Sunny</b></div>
+        <div class="px-4 py-2 border-b border-slate-100 flex justify-between text-xs"><span id="noai-r-solar" class="text-slate-600">Solar output</span><b id="noai-val-solar" class="text-slate-800">4.8 kW</b></div>
+        <div class="px-4 py-2 border-b border-slate-100 flex justify-between text-xs"><span id="noai-r-load" class="text-slate-600">Home usage</span><b id="noai-val-load" class="text-slate-800">2.8 kW</b></div>
+        <div class="px-4 py-2 border-b border-slate-100 text-xs">
+          <div class="flex justify-between items-center">
+            <span id="noai-r-batt" class="text-slate-600">Battery</span>
+            <span class="flex items-center gap-2"><b id="noai-val-battery" class="text-slate-800">10%</b><span id="noai-batt-pill" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded text-white bg-slate-500">Idle</span></span>
           </div>
-          <div class="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden">
-            <div id="noai-batt-bar" class="bg-red-500 h-full rounded-full transition-all duration-500" style="width: 10%"></div>
-          </div>
-          <p id="noai-batt-desc" class="text-[10px] text-slate-500 mt-1.5 leading-snug">No pre-charging or peak reservation.</p>
-
-          <!-- Disabled Mode Bar to contrast with AI App -->
-          <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-400 font-bold uppercase">
-            <span>Battery Control Mode</span>
-            <span class="text-red-500"><i class="fa-solid fa-lock mr-1"></i> Fixed Self-Use Only</span>
-          </div>
+          <div class="w-full bg-slate-200 h-1.5 mt-1.5"><div id="noai-batt-bar" class="bg-slate-500 h-full transition-all duration-500" style="width: 10%"></div></div>
         </div>
+        <div class="px-4 py-2 border-b border-slate-100 flex justify-between text-xs"><span id="noai-r-grid" class="text-slate-600">Buying from TNB</span><b id="noai-grid-badge" class="text-slate-800">0.0 kW</b></div>
+        <div class="px-4 py-2 border-b border-slate-100 flex justify-between items-center text-xs"><span id="noai-r-ev" class="text-slate-600">EV charger</span><span id="noai-ev-pill" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-500 text-white">Idle</span></div>
+        <div class="px-4 py-2 border-b border-slate-200 flex justify-between text-xs"><span id="noai-r-waste" class="text-slate-600">Solar wasted</span><b id="noai-val-waste" class="text-slate-800">0.0 kW</b></div>
 
-        <!-- Dumb EV Charger Card -->
-        <div class="bg-white p-2.5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2.5">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base bg-red-50 text-red-500"><i class="fa-solid fa-plug-circle-exclamation"></i></div>
-            <div>
-              <p class="text-[10px] text-slate-400 font-semibold uppercase">EV Charger (Unscheduled)</p>
-              <p id="noai-ev-desc" class="text-[10px] text-slate-600 leading-snug">Starts immediately at 6PM Peak when plugged in.</p>
-            </div>
-          </div>
-          <span id="noai-ev-pill" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-500 text-white whitespace-nowrap">Idle</span>
-        </div>
+        <!-- Missing features -->
+        <div id="noai-h-miss" class="px-4 py-1.5 bg-slate-100 text-[10px] font-bold uppercase text-slate-500">Not in this app</div>
+        <div class="px-4 py-2 border-b border-slate-100 flex items-center gap-2 text-xs text-slate-600"><i class="fa-solid fa-xmark text-red-500 w-3"></i><span id="noai-m1">Peak-time protection</span></div>
+        <div class="px-4 py-2 border-b border-slate-100 flex items-center gap-2 text-xs text-slate-600"><i class="fa-solid fa-xmark text-red-500 w-3"></i><span id="noai-m2">Weather forecast planning</span></div>
+        <div class="px-4 py-2 border-b border-slate-100 flex items-center gap-2 text-xs text-slate-600"><i class="fa-solid fa-xmark text-red-500 w-3"></i><span id="noai-m3">Appliance timing advice</span></div>
+        <div class="px-4 py-2 border-b border-slate-100 flex items-center gap-2 text-xs text-slate-600"><i class="fa-solid fa-xmark text-red-500 w-3"></i><span id="noai-m4">Battery control (fixed self-use)</span></div>
+        <div class="px-4 py-2 border-b border-slate-200 flex items-center gap-2 text-xs text-slate-600"><i class="fa-solid fa-xmark text-red-500 w-3"></i><span id="noai-m5">Township sharing & rewards</span></div>
 
-        <!-- Dumb Power Routing Card -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-1.5">
-            <span class="text-[11px] font-bold text-slate-700">Current Power Routing</span>
-            <span id="noai-grid-badge" class="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">TNB Grid Draw: 0.0 kW</span>
-          </div>
-          <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex">
-            <div id="noai-bar-solar" class="bg-amber-400 h-full transition-all duration-500" style="width: 100%"></div>
-            <div id="noai-bar-batt" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
-            <div id="noai-bar-grid" class="bg-red-500 h-full transition-all duration-500" style="width: 0%"></div>
-          </div>
-          <div class="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
-            <span>☀️ Solar: <b id="noai-pct-solar">100%</b></span>
-            <span>🔋 Battery: <b id="noai-pct-batt">0%</b></span>
-            <span>⚡ TNB Grid: <b id="noai-pct-grid">0%</b></span>
-          </div>
-          <p class="text-[10px] text-red-700 font-semibold mt-1.5 bg-red-50 rounded-lg px-2 py-1">🚫 Curtailed / Wasted Solar: <b id="noai-val-waste">0.0 kW</b> (No Township Sharing)</p>
-        </div>
-
-        <!-- Cumulative Cost Comparison Footer -->
-        <div class="bg-white p-3 rounded-2xl border border-red-200 shadow-sm flex items-center justify-between">
+        <!-- Cost -->
+        <div class="px-4 py-3 bg-red-50 flex items-center justify-between">
           <div>
-            <p class="text-[10px] text-slate-400 font-semibold">Overpaying Today vs AI Brain</p>
-            <p id="noai-overpay" class="text-lg font-extrabold text-red-600">+RM 0.29 Extra</p>
-            <p class="text-[10px] text-slate-500">Projected loss: <b id="noai-month-loss">RM 265 / month</b></p>
+            <p id="noai-h-extra" class="text-[10px] text-slate-500 font-semibold">Extra cost vs AI app today</p>
+            <p id="noai-overpay" class="text-lg font-bold text-red-600">+RM 0.29 Extra</p>
           </div>
           <div class="text-right">
-            <span class="text-[10px] bg-red-100 text-red-700 font-bold px-2.5 py-1 rounded-full">0 EcoPts</span>
+            <p id="noai-h-proj" class="text-[10px] text-slate-500 font-semibold">Projected</p>
+            <p id="noai-month-loss" class="text-sm font-bold text-slate-700">RM 265 / month</p>
           </div>
         </div>
-
       </div>
 
-      <!-- Bottom Bar (Static Label for Standard Inverter App) -->
-      <div class="bg-slate-900 border-t border-slate-800 px-3 py-3 flex justify-center items-center text-[11px] font-semibold text-slate-400 z-40">
-        <span><i class="fa-solid fa-circle-info text-sky-400 mr-1"></i> Standard Inverter App (e.g., Huawei FusionSolar Basic)</span>
+      <!-- Bottom bar -->
+      <div class="bg-slate-100 border-t border-slate-300 px-3 py-2 flex justify-around items-center text-[10px] font-semibold text-slate-400 z-40">
+        <span class="flex flex-col items-center gap-0.5 text-slate-700"><i class="fa-solid fa-gauge text-base"></i>Overview</span>
+        <span class="flex flex-col items-center gap-0.5"><i class="fa-solid fa-plug text-base"></i>Devices</span>
+        <span class="flex flex-col items-center gap-0.5"><i class="fa-solid fa-chart-column text-base"></i>Reports</span>
+        <span class="flex flex-col items-center gap-0.5"><i class="fa-solid fa-user text-base"></i>Me</span>
       </div>
     </div>
 
@@ -564,7 +406,7 @@
         <span id="sim-diff-bill" class="text-sm font-extrabold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-full border border-emerald-700">RM 0.29</span>
       </div>
       <div class="text-right">
-        <span class="text-[10px] text-red-400 font-bold uppercase block">❌ Dumb App Bill</span>
+        <span class="text-[10px] text-red-400 font-bold uppercase block">❌ Standard App Bill</span>
         <span id="sim-noai-bill" class="text-base font-extrabold text-red-400">RM 1.76</span>
       </div>
     </div>
@@ -657,29 +499,18 @@
       updateSimulation();
     }
 
-    function renderBattery(pct, status, kw, desc) {
+    function renderBattery(pct, status) {
       const c = BATT_STATUS[status];
       const icon = battLevelIcon(pct);
-      document.getElementById('val-battery').innerText = pct + '%';
-      document.getElementById('batt-card').className =
-        'bg-white p-3 rounded-2xl border-2 shadow-sm transition-colors duration-300 ' + c.card;
-      document.getElementById('batt-icon-wrap').className =
-        'w-10 h-10 rounded-xl flex items-center justify-center text-xl ' + c.iconWrap;
-      document.getElementById('batt-icon').className = 'fa-solid ' + icon;
-      document.getElementById('batt-status-pill').className =
-        'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full ' + c.pill;
-      document.getElementById('batt-status-pill').innerHTML = `<i class="fa-solid ${c.icon}"></i> ${lang === 'ms' ? c.ms : c.label}`;
-      const rateEl = document.getElementById('batt-status-rate');
-      rateEl.className = 'text-[10px] font-bold mt-0.5 ' + c.rate;
-      rateEl.innerText = status === 'charging' ? `+${kw.toFixed(1)} kW ${tr('in', 'masuk')}`
-                       : status === 'inuse'    ? `-${kw.toFixed(1)} kW ${tr('out', 'keluar')}`
-                       : tr('Reserved • 0.0 kW', 'Disimpan • 0.0 kW');
-      const bar = document.getElementById('batt-level-bar');
+      $('val-battery').innerText = pct + '%';
+      $('batt-icon').className = 'fa-solid ' + icon + (pct < 20 ? ' text-red-500' : ' text-emerald-600');
+      const pill = $('batt-status-pill');
+      pill.className = 'inline-flex items-center gap-1 text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full mt-1 ' + c.pill;
+      pill.innerHTML = `<i class="fa-solid ${c.icon}"></i> ${lang === 'ms' ? c.ms : c.label}`;
+      const bar = $('batt-level-bar');
       bar.className = 'h-full rounded-full transition-all duration-500 ' + c.bar;
       bar.style.width = pct + '%';
-      document.getElementById('batt-status-desc').innerText = desc;
-      const top = document.getElementById('status-batt-icon');
-      top.className = 'fa-solid ' + icon + (pct < 20 ? ' text-red-500' : ' text-emerald-600');
+      $('status-batt-icon').className = 'fa-solid ' + icon + (pct < 20 ? ' text-red-500' : ' text-emerald-600');
     }
 
     let forecastChartInstance = null;
@@ -859,63 +690,43 @@
       return out;
     }
 
-     function updateApplianceAdvisor(hour, day) {
-       const dt = getDayType();
-       const candidates = day.filter(x => x.h >= 9 && x.h <= 16).map(x => ({...x, surplus: Math.max(0, x.solar - x.base - x.sToB)}));
-       const solarWindow = candidates.filter(x => x.surplus >= 0.8 && x.soc >= 0.35);
-       const bestSolar = solarWindow.length ? solarWindow.sort((a,b) => b.surplus - a.surplus)[0].h : null;
-       const fmtHour = h => lang === 'ms' ? String(h).padStart(2,'0') + ':00' : (h === 12 ? '12 PM' : h > 12 ? (h-12)+' PM' : h+' AM');
-       const solarSlot = bestSolar === null ? null : fmtHour(bestSolar) + '–' + fmtHour(bestSolar+1);
-       const offSlot = tr('10 PM onwards', '10 malam dan seterusnya');
-       const peak = isPeakAt(hour, dt);
-       const surplusNow = Math.max(0, day[hour].solar - day[hour].base - day[hour].sToB);
-       const solarGood = surplusNow >= 0.8 && day[hour].soc >= 0.35;
-       const nightCheap = hour >= 22 || hour < 7 || dt === 'weekend';
-       let status, tip, reason;
-       if (solarGood) {
-         status = tr('GOOD TIME NOW', 'MASA SESUAI SEKARANG');
-         tip = tr('🧺 Good time to run the washing machine using surplus rooftop solar.', '🧺 Masa sesuai untuk guna mesin basuh dengan lebihan tenaga solar.');
-         reason = tr(`Estimated available solar surplus: ${surplusNow.toFixed(1)} kW. Check your appliance power rating first.`, `Anggaran lebihan solar: ${surplusNow.toFixed(1)} kW. Semak kuasa peralatan dahulu.`);
-       } else if (peak) {
-         status = tr('WAIT IF POSSIBLE', 'TANGGUH JIKA BOLEH');
-         tip = tr('⏳ Delay flexible laundry and dishwasher cycles until a cheaper period.', '⏳ Tangguhkan cucian dan mesin pinggan ke waktu lebih murah.');
-         reason = tr('Weekday peak is 2 PM–10 PM in this demo. Preserve battery for essential home demand.', 'Waktu puncak hari bekerja ialah 2 petang–10 malam dalam demo ini. Simpan bateri untuk keperluan utama.');
-       } else if (nightCheap) {
-         status = tr('OFF-PEAK OPTION', 'PILIHAN LUAR PUNCAK');
-         tip = tr('🌙 Off-peak is suitable for flexible appliances if safe and convenient.', '🌙 Waktu luar puncak sesuai untuk peralatan fleksibel jika selamat dan praktikal.');
-         reason = tr('Use a delayed-start timer where appropriate; avoid leaving high-risk appliances running unattended.', 'Gunakan pemasa jika sesuai; elakkan membiarkan peralatan berisiko beroperasi tanpa pengawasan.');
-       } else {
-         status = tr('PLAN AHEAD', 'RANCANG AWAL');
-         tip = tr('☀️ Plan laundry for the strongest surplus-solar hour, if available.', '☀️ Rancang cucian pada waktu lebihan solar tertinggi, jika ada.');
-         reason = tr('Recommendations update with simulated weather, solar output, and battery charging.', 'Cadangan berubah mengikut simulasi cuaca, tenaga solar dan pengecasan bateri.');
-       }
-       $('appliance-heading').innerText = tr('Smart Appliance Advice', 'Cadangan Peralatan Pintar');
-       $('appliance-status').innerText = status;
-       $('appliance-status').className = 'text-[9px] font-bold rounded-full px-2 py-0.5 bg-white/20 text-white';
-       $('appliance-tip').innerText = tip;
-       $('appliance-reason').innerText = reason;
-       $('washer-label').innerText = tr('🧺 Washer', '🧺 Mesin basuh');
-       $('dish-label').innerText = tr('🍽️ Dishwasher', '🍽️ Mesin pinggan');
-       $('washer-time').innerText = solarSlot || offSlot;
-       $('dish-time').innerText = solarSlot || offSlot;
-       $('ev-label').innerText = tr('🚗 EV Charger', '🚗 Pengecas EV');
-       $('ev-best-time').innerText = dt === 'weekday' ? tr('10 PM+', '10 MLM+') : (solarSlot || offSlot);
-       $('appliance-disclaimer').innerText = tr('Simulation only • No remote appliance control', 'Simulasi sahaja • Tiada kawalan peralatan jarak jauh');
-       $('appliance-schedule-heading').innerText = tr('🧠 Suggested Appliance Schedule', '🧠 Cadangan Jadual Peralatan');
-       const entries = [
-         [tr('🧺 Washing machine', '🧺 Mesin basuh'), solarSlot || offSlot, solarSlot ? tr('Use spare solar generation', 'Guna lebihan tenaga solar') : tr('Low solar: choose off-peak', 'Solar rendah: pilih luar puncak')],
-         [tr('🍽️ Dishwasher', '🍽️ Mesin pinggan'), solarSlot || offSlot, tr('Run only when convenient and safe', 'Jalankan apabila sesuai dan selamat')],
-         [tr('🚗 EV charging', '🚗 Pengecasan EV'), dt === 'weekday' ? offSlot : tr('Off-peak / solar surplus', 'Luar puncak / lebihan solar'), tr('Subject to charger and vehicle settings', 'Bergantung pada tetapan pengecas dan kereta')]
-       ];
-       $('appliance-schedule-list').replaceChildren(...entries.map(([name,time,why]) => {
-         const el=document.createElement('div'); el.className='flex justify-between gap-2 border-b border-slate-100 pb-2';
-         const left=document.createElement('div'), right=document.createElement('b');
-         const n=document.createElement('p'), w=document.createElement('p');
-         n.className='font-bold text-slate-700'; n.textContent=name; w.className='text-[10px] text-slate-400'; w.textContent=why;
-         right.className='text-emerald-700 whitespace-nowrap text-right'; right.textContent=time;
-         left.append(n,w); el.append(left,right); return el;
-       }));
-     }
+    function updateApplianceAdvisor(hour, day) {
+      const dt = getDayType();
+      const candidates = day.filter(x => x.h >= 9 && x.h <= 16).map(x => ({...x, surplus: Math.max(0, x.solar - x.base - x.sToB)}));
+      const solarWindow = candidates.filter(x => x.surplus >= 0.8 && x.soc >= 0.35);
+      const bestSolar = solarWindow.length ? solarWindow.sort((a, b) => b.surplus - a.surplus)[0].h : null;
+      const fmtHour = h => lang === 'ms' ? String(h).padStart(2, '0') + ':00' : (h === 12 ? '12 PM' : h > 12 ? (h - 12) + ' PM' : h + ' AM');
+      const solarSlot = bestSolar === null ? null : fmtHour(bestSolar) + '–' + fmtHour(bestSolar + 1);
+      const offSlot = tr('10 PM+', '10 MLM+');
+      const peak = isPeakAt(hour, dt);
+      const surplusNow = Math.max(0, day[hour].solar - day[hour].base - day[hour].sToB);
+      const solarGood = surplusNow >= 0.8 && day[hour].soc >= 0.35;
+      const nightCheap = hour >= 22 || hour < 7 || dt === 'weekend';
+      let status, tip, cls;
+      if (solarGood) {
+        status = tr('GOOD TIME NOW', 'MASA SESUAI'); cls = 'bg-emerald-100 text-emerald-700';
+        tip = tr('🧺 Run the washer now — free solar is available.', '🧺 Guna mesin basuh sekarang — solar percuma tersedia.');
+      } else if (peak) {
+        status = tr('WAIT', 'TANGGUH'); cls = 'bg-amber-100 text-amber-700';
+        tip = tr('⏳ Wait for a cheaper time if you can.', '⏳ Tunggu waktu lebih murah jika boleh.');
+      } else if (nightCheap) {
+        status = tr('OFF-PEAK', 'LUAR PUNCAK'); cls = 'bg-emerald-100 text-emerald-700';
+        tip = tr('🌙 Off-peak now — good for flexible appliances.', '🌙 Luar puncak — sesuai untuk peralatan fleksibel.');
+      } else {
+        status = tr('PLAN AHEAD', 'RANCANG AWAL'); cls = 'bg-slate-100 text-slate-600';
+        tip = tr('☀️ Plan laundry for the sunniest hour.', '☀️ Rancang cucian pada waktu paling cerah.');
+      }
+      $('appliance-heading').innerText = tr('Best time to run appliances', 'Masa terbaik guna peralatan');
+      $('appliance-status').innerText = status;
+      $('appliance-status').className = 'text-[10px] font-bold rounded-full px-2 py-0.5 whitespace-nowrap ' + cls;
+      $('appliance-tip').innerText = tip;
+      $('washer-label').innerText = tr('🧺 Washer', '🧺 Mesin basuh');
+      $('dish-label').innerText = tr('🍽️ Dishwasher', '🍽️ Mesin pinggan');
+      $('ev-label').innerText = tr('🚗 EV', '🚗 EV');
+      $('washer-time').innerText = solarSlot || offSlot;
+      $('dish-time').innerText = solarSlot || offSlot;
+      $('ev-best-time').innerText = dt === 'weekday' ? offSlot : (solarSlot || offSlot);
+    }
 
     function updateSimulation() {
       const hour = parseInt($('time-slider').value);
@@ -948,13 +759,13 @@
       $('ai-hour-delta').innerText = hour === 0
         ? 'RM 0.00/hr (Start)'
         : `+RM ${st.cost.toFixed(2)}/hr`;
-      $('ai-tariff-pill').className = 'text-[10px] font-extrabold px-2 py-0.5 rounded text-white uppercase ' + (st.peak ? 'bg-red-600' : 'bg-emerald-600');
+      $('ai-tariff-pill').className = 'text-[10px] font-extrabold px-2 py-0.5 rounded text-white uppercase whitespace-nowrap ' + (st.peak ? 'bg-red-600' : 'bg-white/25');
       $('ai-tariff-pill').innerText = st.peak ? `Peak ${rp}s` : `Cheap ${rc}s`;
       $('ai-saved-badge').innerText = `${tr('Saved', 'Jimat')} ${fmtRM(billSaved)}`;
 
       $('noai-live-bill').innerText = fmtRM(costNo);
       $('noai-hour-delta').innerText = hour === 0 ? 'RM 0.00/hr (Start)' : `+RM ${stNo.cost.toFixed(2)}/hr`;
-      $('noai-tariff-pill').className = 'text-[10px] font-extrabold px-2 py-0.5 rounded text-white uppercase ' + (stNo.peak ? 'bg-red-600' : 'bg-emerald-600');
+      $('noai-tariff-pill').className = 'text-[10px] font-extrabold px-2 py-0.5 rounded text-white uppercase whitespace-nowrap ' + (stNo.peak ? 'bg-red-600' : 'bg-emerald-600');
       $('noai-tariff-pill').innerText = stNo.peak ? `Peak ${rp}s` : `Cheap ${rc}s`;
       $('noai-extra-badge').innerText = `+${fmtRM(billSaved)} ${tr('higher', 'lebih mahal')}`;
 
@@ -969,27 +780,7 @@
       if (batteryMode === 'hold' && status !== 'charging') status = 'hold';
       if (batteryMode === 'use' && st.bToLoad > 0.05) status = 'inuse';
 
-      let battDesc;
-      if (batteryMode === 'hold') {
-        battDesc = tr('Manual HOLD active: Battery locked & preserved. Home uses Solar/Grid.', 'Mod TUNGGU manual aktif: Bateri dikunci & disimpan.');
-      } else if (batteryMode === 'use') {
-        battDesc = st.bToLoad > 0.05
-          ? tr('Manual FORCE USE active: Discharging battery right now.', 'Mod GUNA PAKSA aktif: Menyahcas bateri sekarang.')
-          : tr('Manual FORCE USE active: Solar is already covering 100% of home load.', 'Mod GUNA PAKSA aktif: Solar sudah menampung 100% beban rumah.');
-      } else if (status === 'charging') {
-        battDesc = st.gToB > 0.05
-          ? tr('Weather forecast is low-sun: Pre-charging battery on cheap 24.43s tariff before 2PM Peak.', 'Ramalan cuaca mendung/ribut: Pra-cas bateri guna tarif murah 24.43s sebelum Puncak 2PM.')
-          : tr('Storing free rooftop solar so battery reaches ~98% before 2PM–10PM Peak.', 'Menyimpan solar bumbung percuma supaya bateri penuh sebelum Puncak 2PM–10PM.');
-      } else if (status === 'inuse') {
-        battDesc = st.solar > 0.05
-          ? tr('Blending stored battery with solar so you pay RM 0.00/hr during TNB Peak!', 'Menggabungkan bateri & solar supaya anda bayar RM 0.00/jam waktu Puncak!')
-          : tr('Sun has set (Evening Peak): Battery powers 100% of home AC & lights at RM 0.00/hr!', 'Matahari terbenam (Puncak Petang): Bateri menampung 100% beban rumah pada RM 0.00/jam!');
-      } else {
-        battDesc = hour === 0
-          ? tr('00:00 Midnight: New billing day starts at RM 0.00. 50% battery reserved.', '00:00 Tengah Malam: Hari bil baharu bermula pada RM 0.00.')
-          : tr('Battery reserved for 2PM–10PM Peak! Running home on cheap 24.43s Off-Peak TNB tariff.', 'Bateri disimpan untuk Puncak 2PM–10PM! Rumah guna tarif murah TNB 24.43s.');
-      }
-      renderBattery(pct, status, Math.abs(net), battDesc);
+      renderBattery(pct, status);
 
       // Banner styling & text based on AI Auto vs Manual Override
       const bannerEl = $('ai-banner');
@@ -997,17 +788,17 @@
       let t, d;
 
       if (batteryMode === 'hold') {
-        bannerEl.className = 'bg-gradient-to-r from-slate-700 to-slate-800 text-white p-3 rounded-2xl shadow-md transition-all duration-300';
+        bannerEl.className = 'bg-gradient-to-r from-slate-700 to-slate-800 text-white p-4 rounded-3xl shadow-md transition-all duration-300';
         badgeEl.innerHTML = '<i class="fa-solid fa-hand mr-1"></i> ' + tr('Manual Override: HOLD', 'Kawalan Manual: TUNGGU');
         t = tr('Battery Locked on Standby (Reserve Mode)', 'Bateri Dikunci dalam Mod Tunggu (Simpanan)');
         d = tr(`Holding battery at ${pct}% for backup. Home draws ${st.imp.toFixed(1)} kW from TNB grid.`, `Menyimpan bateri pada ${pct}%. Rumah menarik ${st.imp.toFixed(1)} kW dari grid TNB.`);
       } else if (batteryMode === 'use') {
-        bannerEl.className = 'bg-gradient-to-r from-amber-500 to-orange-600 text-white p-3 rounded-2xl shadow-md transition-all duration-300';
+        bannerEl.className = 'bg-gradient-to-r from-amber-500 to-orange-600 text-white p-4 rounded-3xl shadow-md transition-all duration-300';
         badgeEl.innerHTML = '<i class="fa-solid fa-bolt mr-1"></i> ' + tr('Manual Override: FORCE USE', 'Kawalan Manual: GUNA PAKSA');
         t = tr('Manual Battery Discharge Active', 'Nyahcas Bateri Manual Aktif');
         d = tr(`Forcing battery to power home right now (${st.bToLoad.toFixed(1)} kW out). TNB Grid draw: ${st.imp.toFixed(1)} kW.`, `Memaksa bateri membekalkan kuasa rumah sekarang (${st.bToLoad.toFixed(1)} kW keluar).`);
       } else {
-        bannerEl.className = 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-3 rounded-2xl shadow-md transition-all duration-300';
+        bannerEl.className = 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white p-4 rounded-3xl shadow-md transition-all duration-300';
         badgeEl.innerHTML = '<i class="fa-solid fa-microchip mr-1"></i> ' + tr('AI Brain Active', 'AI Brain Aktif');
         if (hour === 0) {
           t = tr('00:00 Midnight — New Billing Day Starts (RM 0.00)', '00:00 Tengah Malam — Hari Bil Baharu Bermula (RM 0.00)');
@@ -1049,82 +840,67 @@
       const battShare = hour === 0 ? 100 : Math.round(st.bToLoad / totalLoad * 100);
       const gridShare = hour === 0 ? 0 : Math.max(0, 100 - solarShare - battShare);
       [['solar', solarShare], ['batt', battShare], ['grid', gridShare]].forEach(([k, v]) => { $('bar-' + k).style.width = v + '%'; $('pct-' + k).innerText = v + '%'; });
-      $('grid-draw-badge').innerText = tr(`TNB Grid Draw: ${st.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${st.imp.toFixed(1)} kW`);
       $('val-export').innerText = sharingOn ? st.exp.toFixed(1) + ' kW' : tr('Sharing off', 'Perkongsian dimatikan');
       $('val-credit-today').innerText = `+RM ${creditAI.toFixed(2)} Rebate`;
 
-      // EV card (Phone 1)
-      let evL = tr('Idle', 'Rehat'), evC = 'bg-slate-500', evD = tr('No EV session right now.', 'Tiada sesi EV buat masa ini.'), evI = 'bg-slate-100 text-slate-500';
-      if (evHours(true, dt).includes(hour)) { evL = tr('Charging', 'Mengecas'); evC = 'bg-emerald-600'; evI = 'bg-emerald-100 text-emerald-600'; evD = tr(`Smart-shifted to 10PM cheap tariff (${EV_KW} kW).`, `Dijadual ke tarif murah 10 malam (${EV_KW} kW).`); }
-      else if (hour >= 18 && hour < 22 && !isWeekend) { evL = tr('Delayed', 'Ditangguh'); evC = 'bg-amber-500'; evI = 'bg-amber-100 text-amber-600'; evD = tr('Plugged in at 6PM. AI waits until 10:00 PM cheap tariff!', 'Dipalamkan 6PM. AI tunggu sehingga tarif murah 10:00 malam!'); }
-      $('ev-pill').className = 'shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full text-white ' + evC;
-      $('ev-pill').innerText = evL; $('ev-desc').innerText = evD;
-      // EV state is now shown within the unified AI Brain card.
 
-      // ===== PHONE 2 (WITHOUT AI / DUMB SOLAR APP) UPDATES =====
+      // ===== PHONE 2 (STANDARD APP) UPDATES =====
       $('noai-val-solar').innerText = stNo.solar + ' kW';
       $('noai-val-load').innerText = stNo.load.toFixed(1) + ' kW';
+      $('noai-grid-badge').innerText = stNo.imp.toFixed(1) + ' kW';
+      $('noai-val-waste').innerText = stNo.waste.toFixed(1) + ' kW';
 
       const pctNo = Math.round(stNo.soc * 100), netNo = stNo.sToB - stNo.bToLoad;
       $('noai-val-battery').innerText = pctNo + '%';
       $('noai-batt-bar').style.width = pctNo + '%';
-      $('noai-batt-icon').className = 'fa-solid ' + battLevelIcon(pctNo);
-      $('noai-top-batt').className = 'fa-solid ' + battLevelIcon(pctNo) + (pctNo < 20 ? ' text-red-400' : ' text-amber-400');
-
-      if (netNo > 0.05) {
-        $('noai-batt-pill').innerText = tr('Charging', 'Mengecas');
-        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500 text-white';
-        $('noai-batt-rate').innerText = `+${netNo.toFixed(1)} kW`;
-        $('noai-batt-desc').innerText = tr('Slow unoptimized charging; clips & wastes excess solar.', 'Cas perlahan; membazir lebihan solar tengah hari.');
-      } else if (netNo < -0.05) {
-        $('noai-batt-pill').innerText = tr('Draining Fast', 'Cepat Habis');
-        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-orange-600 text-white';
-        $('noai-batt-rate').innerText = `${netNo.toFixed(1)} kW`;
-        $('noai-batt-desc').innerText = tr('Draining battery rapidly due to unscheduled Evening EV + AC!', 'Menghabiskan bateri dengan cepat kerana EV + AC tidak dijadualkan!');
-      } else {
-        $('noai-batt-pill').innerText = pctNo <= 12 ? tr('Empty (10%)', 'Kosong (10%)') : tr('Idle', 'Rehat');
-        $('noai-batt-pill').className = 'inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-600 text-white';
-        $('noai-batt-rate').innerText = '0.0 kW';
-        $('noai-batt-desc').innerText = pctNo <= 12
-          ? tr('Battery depleted to 10%! Forced to buy expensive TNB power.', 'Bateri habis ke 10%! Terpaksa beli kuasa TNB yang mahal.')
-          : tr('No tariff scheduling.', 'Tiada penjadualan tarif.');
-      }
+      $('noai-top-batt').className = 'fa-solid ' + battLevelIcon(pctNo) + (pctNo < 20 ? ' text-red-500' : ' text-slate-500');
+      let bp, bc;
+      if (netNo > 0.05) { bp = tr('Charging', 'Mengecas'); bc = 'bg-amber-500'; }
+      else if (netNo < -0.05) { bp = tr('Draining', 'Habis'); bc = 'bg-orange-600'; }
+      else if (pctNo <= 12) { bp = tr('Empty', 'Kosong'); bc = 'bg-red-600'; }
+      else { bp = tr('Idle', 'Rehat'); bc = 'bg-slate-500'; }
+      $('noai-batt-pill').innerText = bp;
+      $('noai-batt-pill').className = 'text-[10px] font-bold uppercase px-2 py-0.5 rounded text-white ' + bc;
 
       if (hour === 0) {
-        $('noai-title').innerText = tr('00:00 Midnight — New Billing Day Starts (RM 0.00)', '00:00 Tengah Malam — Hari Bil Baharu Bermula (RM 0.00)');
-        $('noai-desc').innerText = tr('Battery already drained to 10% the night before.', 'Bateri sudah habis ke 10% sejak malam semalam.');
-      } else if (stNo.peak && stNo.grid > 0.1) {
-        $('noai-title').innerText = tr(`Paying Expensive ${rp} sen TNB Peak! (+RM ${stNo.cost.toFixed(2)}/hr)`, `Membayar Waktu Puncak TNB ${rp} sen! (+RM ${stNo.cost.toFixed(2)}/jam)`);
-        $('noai-desc').innerText = tr(`Pulling ${stNo.grid.toFixed(1)} kW from TNB during Peak hours because battery ran out & EV started at 6PM!`, `Menarik ${stNo.grid.toFixed(1)} kW dari TNB waktu Puncak kerana bateri habis & EV mula cas 6 petang!`);
-      } else if (stNo.waste > 0.1) {
-        $('noai-title').innerText = tr('Wasting Midday Rooftop Solar', 'Membazir Solar Bumbung Tengah Hari');
-        $('noai-desc').innerText = tr(`${stNo.waste.toFixed(1)} kW of clean solar is wasted with zero township sharing credit.`, `${stNo.waste.toFixed(1)} kW solar terbuang tanpa kredit perkongsian perbandaran.`);
+        $('noai-title').innerText = tr('New billing day starts', 'Hari bil baharu bermula');
+        $('noai-desc').innerText = tr('The battery was already drained to 10% last night.', 'Bateri sudah habis ke 10% malam tadi.');
+      } else if (stNo.peak && stNo.imp > 0.05) {
+        $('noai-title').innerText = tr(`Paying peak price (${rp} sen)`, `Membayar harga puncak (${rp} sen)`);
+        $('noai-desc').innerText = tr(`Battery is empty, so the home buys ${stNo.imp.toFixed(1)} kW from TNB at the expensive rate (+RM ${stNo.cost.toFixed(2)}/hr).`, `Bateri kosong, jadi rumah beli ${stNo.imp.toFixed(1)} kW dari TNB pada kadar mahal (+RM ${stNo.cost.toFixed(2)}/jam).`);
+      } else if (stNo.waste > 0.05) {
+        $('noai-title').innerText = tr('Free solar is being wasted', 'Solar percuma terbuang');
+        $('noai-desc').innerText = tr(`${stNo.waste.toFixed(1)} kW is lost — the battery charges slowly and nothing is shared.`, `${stNo.waste.toFixed(1)} kW terbuang — bateri mengecas perlahan dan tiada perkongsian.`);
       } else {
-        $('noai-title').innerText = tr('Unscheduled TNB Grid Draw', 'Penggunaan Grid TNB Tanpa Jadual');
-        $('noai-desc').innerText = tr('No weather look-ahead or TNB Time-of-Use tariff optimization.', 'Tiada ramalan cuaca atau pengoptimuman tarif TNB.');
+        $('noai-title').innerText = tr('Using grid power without a plan', 'Guna kuasa grid tanpa rancangan');
+        $('noai-desc').innerText = tr("This app doesn't know TNB's peak hours or the weather.", 'Aplikasi ini tidak tahu waktu puncak TNB atau cuaca.');
       }
 
       if (evHours(false, dt).includes(hour)) {
-        $('noai-ev-pill').innerText = tr('Peak Charging!', 'Cas Waktu Puncak!');
-        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-600 text-white whitespace-nowrap';
-        $('noai-ev-desc').innerText = tr(`Pulling ${EV_KW} kW during expensive 28.52 sen Peak!`, `Menarik ${EV_KW} kW semasa waktu Puncak 28.52 sen yang mahal!`);
+        $('noai-ev-pill').innerText = tr('Charging at peak', 'Cas waktu puncak');
+        $('noai-ev-pill').className = 'text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-red-600 text-white';
       } else {
         $('noai-ev-pill').innerText = tr('Idle', 'Rehat');
-        $('noai-ev-pill').className = 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-500 text-white whitespace-nowrap';
-        $('noai-ev-desc').innerText = tr('Charges immediately at 6PM Peak when plugged in.', 'Mengecas serta-merta pada 6 petang (Puncak) apabila dipalam.');
+        $('noai-ev-pill').className = 'text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-500 text-white';
       }
 
-      const noTotalLoad = stNo.load > 0 ? stNo.load : 1;
-      const noSolarShare = hour === 0 ? 0 : Math.round(stNo.sToLoad / noTotalLoad * 100);
-      const noBattShare = hour === 0 ? 0 : Math.round(stNo.bToLoad / noTotalLoad * 100);
-      const noGridShare = hour === 0 ? 0 : Math.max(0, 100 - noSolarShare - noBattShare);
-      $('noai-bar-solar').style.width = noSolarShare + '%'; $('noai-pct-solar').innerText = noSolarShare + '%';
-      $('noai-bar-batt').style.width = noBattShare + '%'; $('noai-pct-batt').innerText = noBattShare + '%';
-      $('noai-bar-grid').style.width = noGridShare + '%'; $('noai-pct-grid').innerText = noGridShare + '%';
-      $('noai-grid-badge').innerText = tr(`TNB Grid Draw: ${stNo.imp.toFixed(1)} kW`, `Penggunaan Grid TNB: ${stNo.imp.toFixed(1)} kW`);
-      $('noai-val-waste').innerText = stNo.waste.toFixed(1) + ' kW';
-      $('noai-overpay').innerText = `+${fmtRM(billSaved)} Extra`;
-      $('noai-month-loss').innerText = `RM ${Math.round(monthly)} / month`;
+      const T = (id, en, ms) => { $(id).innerText = tr(en, ms); };
+      T('noai-h-now', "What's happening", 'Apa yang berlaku');
+      T('noai-h-read', 'Live readings', 'Bacaan semasa'); T('noai-h-val', 'Value', 'Nilai');
+      T('noai-r-weather', 'Weather', 'Cuaca'); T('noai-r-solar', 'Solar output', 'Output solar');
+      T('noai-r-load', 'Home usage', 'Penggunaan rumah'); T('noai-r-batt', 'Battery', 'Bateri');
+      T('noai-r-grid', 'Buying from TNB', 'Beli dari TNB'); T('noai-r-ev', 'EV charger', 'Pengecas EV');
+      T('noai-r-waste', 'Solar wasted', 'Solar terbuang');
+      T('noai-h-miss', 'Not in this app', 'Tiada dalam aplikasi ini');
+      T('noai-m1', 'Peak-time protection', 'Perlindungan waktu puncak');
+      T('noai-m2', 'Weather forecast planning', 'Perancangan ramalan cuaca');
+      T('noai-m3', 'Appliance timing advice', 'Cadangan masa peralatan');
+      T('noai-m4', 'Battery control (fixed self-use)', 'Kawalan bateri (guna sendiri tetap)');
+      T('noai-m5', 'Township sharing & rewards', 'Perkongsian perbandaran & ganjaran');
+      T('noai-h-extra', 'Extra cost vs AI app today', 'Kos tambahan vs aplikasi AI hari ini');
+      T('noai-h-proj', 'Projected', 'Anggaran');
+      $('noai-overpay').innerText = `+${fmtRM(billSaved)} ${tr('Extra', 'Lebih')}`;
+      $('noai-month-loss').innerText = `RM ${Math.round(monthly)} / ${tr('month', 'bulan')}`;
 
       $('val-saved-today').innerText = fmtRM(totalValueSaved);
       $('val-month').innerText = tr(`RM ${Math.round(monthly)} / month`, `RM ${Math.round(monthly)} / bulan`);
